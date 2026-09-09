@@ -18,8 +18,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Portal SIAT | Prefeitura de Maceió',
-  description: 'Desenvolvido por DSF - Inteligência Tributária Municipal.',
+  title: 'Portal de Serviços | Prefeitura de Maceió',
+  description:
+    'Consulte débitos, emita guias e regularize sua situação online.',
   icons: {
     icon: '/favicon.png',
   },
@@ -32,7 +33,7 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang='en'
+      lang='pt-BR'
       className={cn(
         'h-full',
         'antialiased',

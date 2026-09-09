@@ -1,7 +1,6 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
 import {
   Sheet,
   SheetContent,
@@ -14,83 +13,87 @@ import { Menu } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
-export default function Hero() {
+const navigation = [
+  { label: 'Início', href: '/' },
+  { label: 'Serviços', href: '/#servicos' },
+  { label: 'Como funciona', href: '/#como-funciona' },
+  {
+    label: 'Legislação',
+    href: 'https://www.maceio.al.gov.br/legislacao',
+    external: true,
+  },
+];
+
+export default function Header() {
   return (
-    <header className='border-b border-orange-400 py-4 bg-gray-50'>
-      <div className='flex h-16 items-center justify-between gap-6 px-6'>
-        <Image
-          src='/logoAtual.svg'
-          alt='Brasão'
-          width={80}
-          height={80}
-          style={{ marginLeft: 10 }}
-        />
+    <header className='site-header'>
+      <div className='page-shell header-inner'>
+        <Link
+          className='brand'
+          href='/'
+          aria-label='Portal de Serviços da Prefeitura de Maceió'
+        >
+          <Image
+            src='/logoAtual.svg'
+            alt='Brasão da Prefeitura de Maceió'
+            width={52}
+            height={52}
+          />
+          <span>
+            <strong>Portal de Serviços</strong>
+            <small>Prefeitura de Maceió</small>
+          </span>
+        </Link>
         <Sheet>
           <SheetTrigger asChild>
-            <Button className='lg:hidden mr-auto' variant='outline'>
+            <Button
+              className='mobile-menu-button'
+              variant='outline'
+              aria-label='Abrir menu'
+            >
               <Menu size={20} />
             </Button>
           </SheetTrigger>
-          <SheetContent side='bottom'>
+          <SheetContent side='right' className='mobile-sheet'>
             <SheetHeader>
-              <SheetTitle>Menu</SheetTitle>
-              <SheetDescription>Principais serviços</SheetDescription>
+              <SheetTitle>Navegação</SheetTitle>
+              <SheetDescription>Acesse as áreas do portal.</SheetDescription>
             </SheetHeader>
-            <div className='p-4 space-y-6'>
+            <div className='mobile-nav'>
+              {navigation.map((item) => (
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  target={item.external ? '_blank' : undefined}
+                  rel={item.external ? 'noreferrer' : undefined}
+                >
+                  {item.label}
+                </Link>
+              ))}
               <Link
-                href='https://cartadeservicos.campogrande.ms.gov.br'
-                target='_blank'
-                rel='noreferrer'
+                className='button button-primary'
+                href='/servicos/cidadao/guia'
               >
-                Inicial
-              </Link>
-              <Separator className='mt-2' />
-              <Link
-                href='https://maceio.al.gov.br/secretarias-e-orgaos/sefaz'
-                target='_blank'
-                rel='noreferrer'
-              >
-                SEFAZ
-              </Link>
-              <Separator className='mt-2' />
-              <Link
-                href='https://leis.org/prefeitura/al/maceio'
-                target='_blank'
-                rel='noreferrer'
-              >
-                Leis Municipais
+                Entrar no portal
               </Link>
             </div>
           </SheetContent>
         </Sheet>
-        <nav className='hidden gap-8 lg:flex'>
-          <Link
-            href='https://cartadeservicos.campogrande.ms.gov.br'
-            target='_blank'
-            rel='noreferrer'
-          >
-            Inicial
-          </Link>
-          <Separator style={{ height: 24 }} orientation='vertical' />
-          <Link
-            href='https://maceio.al.gov.br/secretarias-e-orgaos/sefaz'
-            target='_blank'
-            rel='noreferrer'
-          >
-            SEFAZ
-          </Link>
-          <Separator style={{ height: 24 }} orientation='vertical' />
-          <Link
-            href='https://leis.org/prefeitura/al/maceio'
-            target='_blank'
-            rel='noreferrer'
-          >
-            Leis Municipais
-          </Link>
+        <nav className='desktop-nav' aria-label='Navegação principal'>
+          {navigation.map((item) => (
+            <Link
+              key={item.label}
+              href={item.href}
+              target={item.external ? '_blank' : undefined}
+              rel={item.external ? 'noreferrer' : undefined}
+            >
+              {item.label}
+            </Link>
+          ))}
         </nav>
-        <Button className='cursor-pointer rounded-md px-4 font-light bg-sky-800'>
-          Entrar
-        </Button>
+        <Link className='header-cta' href='/servicos/cidadao/guia'>
+          Acessar portal
+        </Link>
       </div>
     </header>
   );
