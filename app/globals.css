@@ -398,6 +398,78 @@ button:focus-visible {
   color: var(--ink-soft);
   line-height: 1.6;
 }
+.negotiation-form {
+  display: grid;
+  gap: 13px;
+  margin-top: 24px;
+  padding-top: 22px;
+  border-top: 1px solid var(--line);
+}
+.form-field {
+  display: grid;
+  gap: 6px;
+}
+.form-field label {
+  color: var(--ink);
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+.form-field input,
+.form-field select {
+  width: 100%;
+  min-height: 43px;
+  padding: 0 12px;
+  border: 1px solid #cbd8dd;
+  border-radius: 3px;
+  color: var(--ink);
+  background: #fbfcfc;
+  font: inherit;
+  font-size: 0.85rem;
+}
+.form-field select {
+  cursor: pointer;
+}
+.form-field input::placeholder {
+  color: #8999a3;
+}
+.form-field input:focus,
+.form-field select:focus {
+  border-color: var(--blue);
+  outline: 3px solid rgba(7, 89, 133, 0.15);
+}
+.form-submit {
+  display: inline-flex;
+  min-height: 43px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 3px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 3px;
+  color: white;
+  background: var(--blue);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.84rem;
+  font-weight: 800;
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease;
+}
+.form-submit:hover {
+  background: var(--blue-deep);
+  transform: translateY(-1px);
+}
+.form-helper {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin: 0 !important;
+  color: #788b95 !important;
+  font-size: 0.72rem;
+  line-height: 1.4 !important;
+}
 .card-link {
   display: inline-flex;
   align-items: center;

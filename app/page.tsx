@@ -11,6 +11,7 @@ import {
   ShieldCheck,
   WalletCards,
 } from 'lucide-react';
+import FormularioNegociacao from './components/formulario-negociacao';
 
 const negotiationOptions = [
   {
@@ -20,6 +21,7 @@ const negotiationOptions = [
     icon: WalletCards,
     href: '/servicos/cidadao/guia',
     action: 'Acessar pagamento à vista',
+    mode: 'vista' as const,
   },
   {
     title: 'Pagamento parcelado',
@@ -28,6 +30,7 @@ const negotiationOptions = [
     icon: CalendarCheck,
     href: '/servicos/empresa/portal-negociacao-imovel',
     action: 'Acessar parcelamento',
+    mode: 'parcelado' as const,
   },
 ];
 
@@ -123,9 +126,7 @@ export default function Home() {
                   </div>
                   <h3>{option.title}</h3>
                   <p>{option.description}</p>
-                  <Link href={option.href} className='card-link'>
-                    {option.action} <ArrowRight size={16} />
-                  </Link>
+                  <FormularioNegociacao mode={option.mode} />
                 </article>
               );
             })}
