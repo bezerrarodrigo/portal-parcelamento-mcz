@@ -1,8 +1,8 @@
 'use client';
 
-import { Separator } from '@/components/ui/separator';
 import { MapPin, Phone } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
 
 export default function Footer() {
   return (
@@ -49,13 +49,13 @@ export default function Footer() {
           >
             Portal da Prefeitura
           </a>
-          <a href='/#como-funciona'>Como funciona</a>
+          <Link href='/#como-funciona'>Como funciona</Link>
         </div>
         <div className='footer-column'>
           <h3>Ajuda</h3>
           <a href='mailto:atendimento@sefaz.maceio.al.gov.br'>Fale conosco</a>
-          <a href='/servicos/cidadao/guia'>Solicitar acesso</a>
-          <a href='/servicos/cidadao/guia'>Acessar portal</a>
+          <Link href='/servicos/cidadao/guia'>Solicitar acesso</Link>
+          <Link href='/servicos/cidadao/guia'>Acessar portal</Link>
         </div>
       </div>
       <div className='footer-bottom'>
