@@ -60,7 +60,7 @@ export default function Footer() {
       </div>
       <div className='footer-bottom'>
         © {new Date().getFullYear()} Prefeitura de Maceió. Todos os direitos
-        reservados.
+        reservados. Desenvolvido por DSF - Inteligência Fiscal.
       </div>
     </footer>
   );
