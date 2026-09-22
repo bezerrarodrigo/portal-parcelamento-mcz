@@ -136,7 +136,7 @@ export default function FormularioConfirmacao({
       </Button>
 
       <Dialog open={termosAbertos} onOpenChange={setTermosAbertos}>
-        <DialogContent className='max-h-screen max-w-2xl overflow-y-auto'>
+        <DialogContent className='max-h-1/2 max-w-2xl overflow-y-auto'>
           <DialogHeader>
             <DialogTitle>Termos do parcelamento</DialogTitle>
             <DialogDescription asChild>
