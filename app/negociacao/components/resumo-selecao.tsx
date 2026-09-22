@@ -41,8 +41,8 @@ export default function ResumoSelecao({
   ];
 
   return (
-    <div className='debitos-summary'>
-      <table>
+    <div className='overflow-x-auto border border-line'>
+      <table className='w-full border-collapse bg-white [&_td]:border-b [&_td]:border-line [&_td]:p-3 [&_td]:text-left [&_td]:text-[0.86rem] [&_th]:border-b [&_th]:border-line [&_th]:p-3 [&_th]:text-left [&_th]:text-[0.86rem]'>
         <thead>
           <tr>
             <th></th>
@@ -57,7 +57,7 @@ export default function ResumoSelecao({
             <tr key={label}>
               <td>
                 <strong>{label}</strong>
-                <small>
+                <small className='mt-1 block text-[0.72rem] text-ink-soft'>
                   {grupo.length} débito(s) / Qtd Guias: {grupo.length ? 1 : 0}
                 </small>
               </td>
@@ -74,7 +74,10 @@ export default function ResumoSelecao({
             <td colSpan={3}>
               <Dialog open={dialogAberto} onOpenChange={setDialogAberto}>
                 <DialogTrigger asChild>
-                  <button type='button' className='card-link'>
+                  <button
+                    type='button'
+                    className='inline-flex items-center gap-2 text-[0.88rem] font-extrabold text-blue hover:text-orange'
+                  >
                     Visualizar
                   </button>
                 </DialogTrigger>
@@ -84,9 +87,12 @@ export default function ResumoSelecao({
                       Dívidas que não podem ser parceladas
                     </DialogTitle>
                   </DialogHeader>
-                  <ul className='debitos-nao-parcelaveis'>
+                  <ul className='m-0 grid list-none gap-2.5 p-0'>
                     {dividasNaoParcelaveis.map((divida) => (
-                      <li key={divida.id}>
+                      <li
+                        key={divida.id}
+                        className='flex justify-between gap-3 border-b border-line pb-2.5'
+                      >
                         <span>{divida.descricao}</span>
                         <strong>{formatCurrency(divida.valor)}</strong>
                       </li>

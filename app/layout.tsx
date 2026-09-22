@@ -43,7 +43,7 @@ export default function RootLayout({
         inter.variable,
       )}
     >
-      <body className='min-h-full flex flex-col'>
+      <body className='min-h-full flex flex-col bg-sand text-ink'>
         <Header />
         {children}
         <Footer />

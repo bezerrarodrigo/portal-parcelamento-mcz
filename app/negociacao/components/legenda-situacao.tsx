@@ -5,7 +5,7 @@ export default function LegendaSituacao() {
   const entradas = Object.entries(legenda);
 
   return (
-    <p className='debitos-legend'>
+    <p className='text-[0.76rem] leading-[1.6] text-ink-soft'>
       <strong>Legenda situação: </strong>
       {entradas.map(([codigo, descricao], index) => (
         <span key={codigo}>

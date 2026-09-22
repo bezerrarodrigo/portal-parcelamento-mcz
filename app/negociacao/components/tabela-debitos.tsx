@@ -24,7 +24,7 @@ export default function TabelaDebitos({
   onToggle,
 }: TabelaDebitosProps) {
   return (
-    <div className='debitos-table-wrapper'>
+    <div className='overflow-x-auto border border-line bg-white'>
       <Table>
         <TableHeader>
           <TableRow>
@@ -69,7 +69,7 @@ export default function TabelaDebitos({
           ))}
           {debitos.length === 0 && (
             <TableRow>
-              <TableCell colSpan={13} className='debitos-empty'>
+              <TableCell colSpan={13} className='text-center text-ink-soft'>
                 Nenhum débito encontrado para os filtros selecionados.
               </TableCell>
             </TableRow>

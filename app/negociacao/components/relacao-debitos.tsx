@@ -64,7 +64,7 @@ export default function RelacaoDebitos({ debitos }: RelacaoDebitosProps) {
   }
 
   return (
-    <div className='debitos-page'>
+    <div className='grid gap-7'>
       <FiltroDebitos
         tributos={tributos}
         exercicios={exercicios}
@@ -74,14 +74,14 @@ export default function RelacaoDebitos({ debitos }: RelacaoDebitosProps) {
         onExercicioChange={setExercicioSelecionado}
       />
 
-      <div className='debitos-table-desktop'>
+      <div className='hidden md:block'>
         <TabelaDebitos
           debitos={debitosFiltrados}
           selecionados={selecionados}
           onToggle={handleToggle}
         />
       </div>
-      <div className='debitos-table-mobile'>
+      <div className='block md:hidden'>
         <CartoesDebitos
           debitos={debitosFiltrados}
           selecionados={selecionados}

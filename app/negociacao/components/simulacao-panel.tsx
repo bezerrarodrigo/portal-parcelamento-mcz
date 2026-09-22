@@ -41,10 +41,15 @@ export default function SimulacaoPanel({ selecionados }: SimulacaoPanelProps) {
   }
 
   return (
-    <div className='simulacao-panel'>
-      <div className='simulacao-inputs'>
-        <div className='form-field'>
-          <label htmlFor='quantidade-parcelas'>Quantidade de parcelas</label>
+    <div className='grid gap-5 border border-line bg-white p-6'>
+      <div className='grid grid-cols-1 items-end gap-4 md:grid-cols-[repeat(2,minmax(0,1fr))_auto]'>
+        <div className='grid gap-1.5'>
+          <label
+            htmlFor='quantidade-parcelas'
+            className='text-[0.76rem] font-extrabold text-ink'
+          >
+            Quantidade de parcelas
+          </label>
           <Input
             id='quantidade-parcelas'
             type='number'
@@ -57,8 +62,13 @@ export default function SimulacaoPanel({ selecionados }: SimulacaoPanelProps) {
             }}
           />
         </div>
-        <div className='form-field'>
-          <label htmlFor='valor-entrada'>Valor da entrada (R$)</label>
+        <div className='grid gap-1.5'>
+          <label
+            htmlFor='valor-entrada'
+            className='text-[0.76rem] font-extrabold text-ink'
+          >
+            Valor da entrada (R$)
+          </label>
           <Input
             id='valor-entrada'
             type='number'
@@ -71,7 +81,7 @@ export default function SimulacaoPanel({ selecionados }: SimulacaoPanelProps) {
             }}
           />
         </div>
-        <div className='simulacao-actions'>
+        <div className='flex flex-col gap-2.5 md:flex-row [&_button]:w-full md:[&_button]:w-auto'>
           <Button
             type='button'
             onClick={handleSimular}
@@ -89,7 +99,7 @@ export default function SimulacaoPanel({ selecionados }: SimulacaoPanelProps) {
         </div>
       </div>
 
-      <div className='simulacao-condicoes'>
+      <div className='[&_h3]:m-0 [&_h3]:mb-2 [&_h3]:text-[1.05rem] [&_h3]:text-ink [&_p]:my-0.5 [&_p]:text-[0.86rem] [&_p]:text-ink-soft'>
         <h3>Condições parcelamento</h3>
         <p>
           Quantidade de parcelas: {QUANTIDADE_MINIMA_PARCELAS} a{' '}
@@ -99,9 +109,9 @@ export default function SimulacaoPanel({ selecionados }: SimulacaoPanelProps) {
       </div>
 
       {resultadoVisivel && (
-        <div className='simulacao-resultado'>
+        <div className='border-t border-line pt-5 [&_h3]:m-0 [&_h3]:mb-2 [&_h3]:text-[1.05rem] [&_h3]:text-ink'>
           <h3>Parcelamento</h3>
-          <table>
+          <table className='w-full border-collapse bg-white [&_td]:border-b [&_td]:border-line [&_td]:p-3 [&_td]:text-left [&_td]:text-[0.86rem] [&_th]:border-b [&_th]:border-line [&_th]:p-3 [&_th]:text-left [&_th]:text-[0.86rem]'>
             <thead>
               <tr>
                 <th>Condições</th>
@@ -133,7 +143,7 @@ export default function SimulacaoPanel({ selecionados }: SimulacaoPanelProps) {
             </tbody>
           </table>
 
-          <div className='simulacao-parcelas'>
+          <div className='mt-4 flex flex-wrap gap-6 border-t border-line pt-4 text-ink'>
             <span>
               <strong>1ª Parcela:</strong>{' '}
               {formatCurrency(resultado.primeiraParcela)}

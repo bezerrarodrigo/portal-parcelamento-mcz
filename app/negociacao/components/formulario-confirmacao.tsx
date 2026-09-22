@@ -50,11 +50,11 @@ export default function FormularioConfirmacao({
 
   if (enviado) {
     return (
-      <div className='confirmacao-panel confirmacao-sucesso'>
+      <div className='flex items-start gap-4 border border-line bg-white p-6 text-blue-deep'>
         <CheckCircle2 size={28} />
         <div>
           <strong>Solicitação registrada com sucesso.</strong>
-          <p>
+          <p className='mt-1.5 text-[0.86rem] text-ink-soft'>
             Este é um protótipo — nenhuma solicitação real foi enviada. Em
             breve, esta etapa será integrada à API de parcelamento.
           </p>
@@ -65,11 +65,16 @@ export default function FormularioConfirmacao({
 
   return (
     <form
-      className='confirmacao-panel negotiation-form'
+      className='grid gap-3.5 border border-line bg-white p-6'
       onSubmit={handleSubmit}
     >
-      <div className='form-field'>
-        <label htmlFor='confirmacao-email'>E-mail*</label>
+      <div className='grid gap-1.5'>
+        <label
+          htmlFor='confirmacao-email'
+          className='text-[0.76rem] font-extrabold text-ink'
+        >
+          E-mail*
+        </label>
         <Input
           id='confirmacao-email'
           type='email'
@@ -77,10 +82,17 @@ export default function FormularioConfirmacao({
           onChange={(event) => setEmail(event.target.value)}
           aria-invalid={Boolean(erros.email)}
         />
-        {erros.email && <span className='form-error'>{erros.email}</span>}
+        {erros.email && (
+          <span className='text-[0.76rem] text-destructive'>{erros.email}</span>
+        )}
       </div>
-      <div className='form-field'>
-        <label htmlFor='confirmacao-telefone'>Telefone*</label>
+      <div className='grid gap-1.5'>
+        <label
+          htmlFor='confirmacao-telefone'
+          className='text-[0.76rem] font-extrabold text-ink'
+        >
+          Telefone*
+        </label>
         <Input
           id='confirmacao-telefone'
           type='tel'
@@ -89,16 +101,22 @@ export default function FormularioConfirmacao({
           onChange={(event) => setTelefone(event.target.value)}
           aria-invalid={Boolean(erros.telefone)}
         />
-        {erros.telefone && <span className='form-error'>{erros.telefone}</span>}
+        {erros.telefone && (
+          <span className='text-[0.76rem] text-destructive'>
+            {erros.telefone}
+          </span>
+        )}
       </div>
-      <label className='confirmacao-termos'>
+      <label className='flex items-center gap-2.5 text-[0.86rem] text-ink'>
         <Checkbox
           checked={aceitouTermos}
           onCheckedChange={(checked) => setAceitouTermos(checked === true)}
         />
         Concordo com estes termos*
       </label>
-      {erros.termos && <span className='form-error'>{erros.termos}</span>}
+      {erros.termos && (
+        <span className='text-[0.76rem] text-destructive'>{erros.termos}</span>
+      )}
       <Button type='submit' disabled={!podeEnviar}>
         Confirmar parcelamento
       </Button>
