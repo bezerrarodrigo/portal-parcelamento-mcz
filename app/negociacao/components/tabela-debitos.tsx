@@ -1,11 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { CaretLeft, CaretRight } from '@phosphor-icons/react';
-import type { Debito } from '@/lib/mock-debitos';
-import { formatCurrency, formatDate } from '@/lib/formatters';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Table,
   TableBody,
@@ -14,7 +10,10 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { formatCurrency, formatDate } from '@/lib/formatters';
+import type { Debito } from '@/lib/mock-debitos';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useState } from 'react';
 
 interface TabelaDebitosProps {
   debitos: Debito[];
