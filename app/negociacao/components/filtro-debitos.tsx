@@ -1,21 +1,16 @@
 'use client';
 
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 
 interface FiltroDebitosProps {
   tributos: string[];
   exercicios: number[];
-  tributoSelecionado: string;
-  exercicioSelecionado: string;
-  onTributoChange: (tributo: string) => void;
-  onExercicioChange: (exercicio: string) => void;
+  tributosSelecionados: string[];
+  exerciciosSelecionados: string[];
+  onTributoChange: (tributos: string[]) => void;
+  onExercicioChange: (exercicios: string[]) => void;
   onPesquisar: () => void;
 }
 
@@ -24,8 +19,8 @@ const TODOS = 'todos';
 export default function FiltroDebitos({
   tributos,
   exercicios,
-  tributoSelecionado,
-  exercicioSelecionado,
+  tributosSelecionados,
+  exerciciosSelecionados,
   onTributoChange,
   onExercicioChange,
   onPesquisar,
@@ -43,19 +38,13 @@ export default function FiltroDebitos({
           >
             Tributo
           </label>
-          <Select value={tributoSelecionado} onValueChange={onTributoChange}>
-            <SelectTrigger id='filtro-tributo' className='w-full'>
-              <SelectValue placeholder='Todos os tributos' />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={TODOS}>Todos os tributos</SelectItem>
-              {tributos.map((tributo) => (
-                <SelectItem key={tributo} value={tributo}>
-                  {tributo}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <FiltroMultiplo
+            id='filtro-tributo'
+            opcoes={tributos}
+            selecionados={tributosSelecionados}
+            todosLabel='Todos os tributos'
+            onChange={onTributoChange}
+          />
         </div>
         <div className='grid gap-1.5'>
           <label
@@ -64,22 +53,13 @@ export default function FiltroDebitos({
           >
             Período (exercício)
           </label>
-          <Select
-            value={exercicioSelecionado}
-            onValueChange={onExercicioChange}
-          >
-            <SelectTrigger id='filtro-exercicio' className='w-full'>
-              <SelectValue placeholder='Todos os períodos' />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={TODOS}>Todos os períodos</SelectItem>
-              {exercicios.map((exercicio) => (
-                <SelectItem key={exercicio} value={String(exercicio)}>
-                  {exercicio}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <FiltroMultiplo
+            id='filtro-exercicio'
+            opcoes={exercicios.map(String)}
+            selecionados={exerciciosSelecionados}
+            todosLabel='Todos os períodos'
+            onChange={onExercicioChange}
+          />
         </div>
         <div className='md:col-span-2 md:flex md:justify-end'>
           <Button
@@ -96,3 +76,78 @@ export default function FiltroDebitos({
 }
 
 export { TODOS };
+
+interface FiltroMultiploProps {
+  id: string;
+  opcoes: string[];
+  selecionados: string[];
+  todosLabel: string;
+  onChange: (valores: string[]) => void;
+}
+
+function FiltroMultiplo({
+  id,
+  opcoes,
+  selecionados,
+  todosLabel,
+  onChange,
+}: FiltroMultiploProps) {
+  const [aberto, setAberto] = useState(false);
+  const todosSelecionados = selecionados.includes(TODOS);
+  const resumo = todosSelecionados
+    ? todosLabel
+    : selecionados.length > 0
+      ? selecionados.join(', ')
+      : todosLabel;
+
+  function alternar(valor: string) {
+    if (valor === TODOS) {
+      onChange([TODOS]);
+      return;
+    }
+
+    const valores = selecionados.filter((item) => item !== TODOS);
+    const novosValores = valores.includes(valor)
+      ? valores.filter((item) => item !== valor)
+      : [...valores, valor];
+    onChange(novosValores.length > 0 ? novosValores : [TODOS]);
+  }
+
+  return (
+    <div className='relative'>
+      <button
+        id={id}
+        type='button'
+        aria-expanded={aberto}
+        onClick={() => setAberto((atual) => !atual)}
+        className='flex h-9 w-full items-center justify-between rounded-md border border-input bg-transparent px-2.5 text-left text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50'
+      >
+        <span className='truncate'>{resumo}</span>
+        <span aria-hidden='true'>⌄</span>
+      </button>
+      {aberto && (
+        <div className='absolute z-50 mt-1 max-h-60 w-full overflow-y-auto rounded-md bg-popover p-1 text-popover-foreground shadow-md ring-1 ring-foreground/10'>
+          <label className='flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm hover:bg-accent'>
+            <Checkbox
+              checked={todosSelecionados}
+              onCheckedChange={() => alternar(TODOS)}
+            />
+            {todosLabel}
+          </label>
+          {opcoes.map((opcao) => (
+            <label
+              key={opcao}
+              className='flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm hover:bg-accent'
+            >
+              <Checkbox
+                checked={selecionados.includes(opcao)}
+                onCheckedChange={() => alternar(opcao)}
+              />
+              {opcao}
+            </label>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}

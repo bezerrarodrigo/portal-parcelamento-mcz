@@ -16,11 +16,11 @@ interface RelacaoDebitosProps {
 }
 
 export default function RelacaoDebitos({ debitos }: RelacaoDebitosProps) {
-  const [tributoSelecionado, setTributoSelecionado] = useState(TODOS);
-  const [exercicioSelecionado, setExercicioSelecionado] = useState(TODOS);
+  const [tributosSelecionados, setTributosSelecionados] = useState([TODOS]);
+  const [exerciciosSelecionados, setExerciciosSelecionados] = useState([TODOS]);
   const [filtroAplicado, setFiltroAplicado] = useState({
-    tributo: TODOS,
-    exercicio: TODOS,
+    tributos: [TODOS],
+    exercicios: [TODOS],
   });
   const [selecionados, setSelecionados] = useState<Set<string>>(
     () => new Set(debitos.map((debito) => debito.id)),
@@ -39,11 +39,11 @@ export default function RelacaoDebitos({ debitos }: RelacaoDebitosProps) {
     () =>
       debitos.filter((debito) => {
         const passaTributo =
-          filtroAplicado.tributo === TODOS ||
-          debito.tributo === filtroAplicado.tributo;
+          filtroAplicado.tributos.includes(TODOS) ||
+          filtroAplicado.tributos.includes(debito.tributo);
         const passaExercicio =
-          filtroAplicado.exercicio === TODOS ||
-          String(debito.exercicio) === filtroAplicado.exercicio;
+          filtroAplicado.exercicios.includes(TODOS) ||
+          filtroAplicado.exercicios.includes(String(debito.exercicio));
         return passaTributo && passaExercicio;
       }),
     [debitos, filtroAplicado],
@@ -73,14 +73,14 @@ export default function RelacaoDebitos({ debitos }: RelacaoDebitosProps) {
       <FiltroDebitos
         tributos={tributos}
         exercicios={exercicios}
-        tributoSelecionado={tributoSelecionado}
-        exercicioSelecionado={exercicioSelecionado}
-        onTributoChange={setTributoSelecionado}
-        onExercicioChange={setExercicioSelecionado}
+        tributosSelecionados={tributosSelecionados}
+        exerciciosSelecionados={exerciciosSelecionados}
+        onTributoChange={setTributosSelecionados}
+        onExercicioChange={setExerciciosSelecionados}
         onPesquisar={() =>
           setFiltroAplicado({
-            tributo: tributoSelecionado,
-            exercicio: exercicioSelecionado,
+            tributos: tributosSelecionados,
+            exercicios: exerciciosSelecionados,
           })
         }
       />
