@@ -7,6 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
 
 interface FiltroDebitosProps {
   tributos: string[];
@@ -15,6 +16,7 @@ interface FiltroDebitosProps {
   exercicioSelecionado: string;
   onTributoChange: (tributo: string) => void;
   onExercicioChange: (exercicio: string) => void;
+  onPesquisar: () => void;
 }
 
 const TODOS = 'todos';
@@ -26,6 +28,7 @@ export default function FiltroDebitos({
   exercicioSelecionado,
   onTributoChange,
   onExercicioChange,
+  onPesquisar,
 }: FiltroDebitosProps) {
   return (
     <div>
@@ -77,6 +80,15 @@ export default function FiltroDebitos({
               ))}
             </SelectContent>
           </Select>
+        </div>
+        <div className='md:col-span-2 md:flex md:justify-end'>
+          <Button
+            type='button'
+            onClick={onPesquisar}
+            className='w-full md:w-auto'
+          >
+            Pesquisar
+          </Button>
         </div>
       </div>
     </div>

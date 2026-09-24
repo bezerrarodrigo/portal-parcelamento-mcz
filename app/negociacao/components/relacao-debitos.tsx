@@ -18,6 +18,10 @@ interface RelacaoDebitosProps {
 export default function RelacaoDebitos({ debitos }: RelacaoDebitosProps) {
   const [tributoSelecionado, setTributoSelecionado] = useState(TODOS);
   const [exercicioSelecionado, setExercicioSelecionado] = useState(TODOS);
+  const [filtroAplicado, setFiltroAplicado] = useState({
+    tributo: TODOS,
+    exercicio: TODOS,
+  });
   const [selecionados, setSelecionados] = useState<Set<string>>(
     () => new Set(debitos.map((debito) => debito.id)),
   );
@@ -35,13 +39,14 @@ export default function RelacaoDebitos({ debitos }: RelacaoDebitosProps) {
     () =>
       debitos.filter((debito) => {
         const passaTributo =
-          tributoSelecionado === TODOS || debito.tributo === tributoSelecionado;
+          filtroAplicado.tributo === TODOS ||
+          debito.tributo === filtroAplicado.tributo;
         const passaExercicio =
-          exercicioSelecionado === TODOS ||
-          String(debito.exercicio) === exercicioSelecionado;
+          filtroAplicado.exercicio === TODOS ||
+          String(debito.exercicio) === filtroAplicado.exercicio;
         return passaTributo && passaExercicio;
       }),
-    [debitos, tributoSelecionado, exercicioSelecionado],
+    [debitos, filtroAplicado],
   );
 
   const debitosSelecionados = useMemo(
@@ -72,6 +77,12 @@ export default function RelacaoDebitos({ debitos }: RelacaoDebitosProps) {
         exercicioSelecionado={exercicioSelecionado}
         onTributoChange={setTributoSelecionado}
         onExercicioChange={setExercicioSelecionado}
+        onPesquisar={() =>
+          setFiltroAplicado({
+            tributo: tributoSelecionado,
+            exercicio: exercicioSelecionado,
+          })
+        }
       />
 
       <div className='hidden md:block'>
