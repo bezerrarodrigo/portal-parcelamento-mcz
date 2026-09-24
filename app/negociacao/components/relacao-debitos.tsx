@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react';
 import type { Debito } from '@/lib/mock-debitos';
 import { getDividasNaoParcelaveis } from '@/lib/mock-debitos';
-import FiltroDebitos, { TODOS } from './filtro-debitos';
+import FiltroDebitos, { TODOS, type DateRange } from './filtro-debitos';
 import TabelaDebitos from './tabela-debitos';
 import CartoesDebitos from './cartoes-debitos';
 import LegendaSituacao from './legenda-situacao';
@@ -18,9 +18,13 @@ interface RelacaoDebitosProps {
 export default function RelacaoDebitos({ debitos }: RelacaoDebitosProps) {
   const [tributosSelecionados, setTributosSelecionados] = useState([TODOS]);
   const [exerciciosSelecionados, setExerciciosSelecionados] = useState([TODOS]);
+  const [vencimentoSelecionado, setVencimentoSelecionado] = useState<DateRange>(
+    {},
+  );
   const [filtroAplicado, setFiltroAplicado] = useState({
     tributos: [TODOS],
     exercicios: [TODOS],
+    vencimento: {} as DateRange,
   });
   const [selecionados, setSelecionados] = useState<Set<string>>(
     () => new Set(debitos.map((debito) => debito.id)),
@@ -44,7 +48,12 @@ export default function RelacaoDebitos({ debitos }: RelacaoDebitosProps) {
         const passaExercicio =
           filtroAplicado.exercicios.includes(TODOS) ||
           filtroAplicado.exercicios.includes(String(debito.exercicio));
-        return passaTributo && passaExercicio;
+        const passaVencimento =
+          (!filtroAplicado.vencimento.from ||
+            debito.vencimento >= filtroAplicado.vencimento.from) &&
+          (!filtroAplicado.vencimento.to ||
+            debito.vencimento <= filtroAplicado.vencimento.to);
+        return passaTributo && passaExercicio && passaVencimento;
       }),
     [debitos, filtroAplicado],
   );
@@ -75,12 +84,15 @@ export default function RelacaoDebitos({ debitos }: RelacaoDebitosProps) {
         exercicios={exercicios}
         tributosSelecionados={tributosSelecionados}
         exerciciosSelecionados={exerciciosSelecionados}
+        vencimentoSelecionado={vencimentoSelecionado}
         onTributoChange={setTributosSelecionados}
         onExercicioChange={setExerciciosSelecionados}
+        onVencimentoChange={setVencimentoSelecionado}
         onPesquisar={() =>
           setFiltroAplicado({
             tributos: tributosSelecionados,
             exercicios: exerciciosSelecionados,
+            vencimento: vencimentoSelecionado,
           })
         }
       />

@@ -9,20 +9,29 @@ interface FiltroDebitosProps {
   exercicios: number[];
   tributosSelecionados: string[];
   exerciciosSelecionados: string[];
+  vencimentoSelecionado: DateRange;
   onTributoChange: (tributos: string[]) => void;
   onExercicioChange: (exercicios: string[]) => void;
+  onVencimentoChange: (vencimento: DateRange) => void;
   onPesquisar: () => void;
 }
 
 const TODOS = 'todos';
+
+export interface DateRange {
+  from?: string;
+  to?: string;
+}
 
 export default function FiltroDebitos({
   tributos,
   exercicios,
   tributosSelecionados,
   exerciciosSelecionados,
+  vencimentoSelecionado,
   onTributoChange,
   onExercicioChange,
+  onVencimentoChange,
   onPesquisar,
 }: FiltroDebitosProps) {
   return (
@@ -59,6 +68,18 @@ export default function FiltroDebitos({
             selecionados={exerciciosSelecionados}
             todosLabel='Todos os períodos'
             onChange={onExercicioChange}
+          />
+        </div>
+        <div className='grid gap-1.5'>
+          <label
+            htmlFor='filtro-vencimento-inicio'
+            className='text-[0.76rem] font-extrabold text-ink'
+          >
+            Vencimento
+          </label>
+          <DateRangePicker
+            value={vencimentoSelecionado}
+            onChange={onVencimentoChange}
           />
         </div>
         <div className='md:col-span-2 md:flex md:justify-end'>
@@ -148,6 +169,38 @@ function FiltroMultiplo({
           ))}
         </div>
       )}
+    </div>
+  );
+}
+
+interface DateRangePickerProps {
+  value: DateRange;
+  onChange: (value: DateRange) => void;
+}
+
+function DateRangePicker({ value, onChange }: DateRangePickerProps) {
+  return (
+    <div className='grid grid-cols-2 gap-2'>
+      <input
+        id='filtro-vencimento-inicio'
+        type='date'
+        aria-label='Vencimento inicial'
+        value={value.from ?? ''}
+        onChange={(event) =>
+          onChange({ ...value, from: event.target.value || undefined })
+        }
+        className='h-9 min-w-0 rounded-md border border-input bg-transparent px-2.5 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50'
+      />
+      <input
+        type='date'
+        aria-label='Vencimento final'
+        value={value.to ?? ''}
+        min={value.from}
+        onChange={(event) =>
+          onChange({ ...value, to: event.target.value || undefined })
+        }
+        className='h-9 min-w-0 rounded-md border border-input bg-transparent px-2.5 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50'
+      />
     </div>
   );
 }
