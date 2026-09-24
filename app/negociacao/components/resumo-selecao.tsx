@@ -40,71 +40,117 @@ export default function ResumoSelecao({
     { label: 'Selecionado', grupo: selecionados },
   ];
 
-  return (
-    <div className='overflow-x-auto border border-line'>
-      <table className='w-full border-collapse bg-white [&_td]:border-b [&_td]:border-line [&_td]:p-3 [&_td]:text-left [&_td]:text-[0.86rem] [&_th]:border-b [&_th]:border-line [&_th]:p-3 [&_th]:text-left [&_th]:text-[0.86rem]'>
-        <thead>
-          <tr>
-            <th></th>
-            <th>Vlr Lançado</th>
-            <th>Vlr Atualizado</th>
-            <th>Jur/Mul/Desc</th>
-            <th>Total</th>
-          </tr>
-        </thead>
-        <tbody>
-          {linhas.map(({ label, grupo }) => (
-            <tr key={label}>
-              <td>
-                <strong>{label}</strong>
-                <small className='mt-1 block text-[0.72rem] text-ink-soft'>
-                  {grupo.length} débito(s) / Qtd Guias: {grupo.length ? 1 : 0}
-                </small>
-              </td>
-              <td>{formatCurrency(somar(grupo, 'valorLancado'))}</td>
-              <td>{formatCurrency(somar(grupo, 'valorAtualizado'))}</td>
-              <td>{formatCurrency(somar(grupo, 'jurosMultaDesconto'))}</td>
-              <td>{formatCurrency(somar(grupo, 'total'))}</td>
-            </tr>
+  const dialogDividasNaoParcelaveis = (
+    <Dialog open={dialogAberto} onOpenChange={setDialogAberto}>
+      <DialogTrigger asChild>
+        <button
+          type='button'
+          className='inline-flex items-center gap-2 text-[0.88rem] font-extrabold text-blue hover:text-orange'
+        >
+          Visualizar
+        </button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Dívidas que não podem ser parceladas</DialogTitle>
+        </DialogHeader>
+        <ul className='m-0 grid list-none gap-2.5 p-0'>
+          {dividasNaoParcelaveis.map((divida) => (
+            <li
+              key={divida.id}
+              className='flex justify-between gap-3 border-b border-line pb-2.5'
+            >
+              <span>{divida.descricao}</span>
+              <strong>{formatCurrency(divida.valor)}</strong>
+            </li>
           ))}
-          <tr>
-            <td>
-              <strong>Dívida(s) que não podem ser parceladas</strong>
-            </td>
-            <td colSpan={3}>
-              <Dialog open={dialogAberto} onOpenChange={setDialogAberto}>
-                <DialogTrigger asChild>
-                  <button
-                    type='button'
-                    className='inline-flex items-center gap-2 text-[0.88rem] font-extrabold text-blue hover:text-orange'
-                  >
-                    Visualizar
-                  </button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>
-                      Dívidas que não podem ser parceladas
-                    </DialogTitle>
-                  </DialogHeader>
-                  <ul className='m-0 grid list-none gap-2.5 p-0'>
-                    {dividasNaoParcelaveis.map((divida) => (
-                      <li
-                        key={divida.id}
-                        className='flex justify-between gap-3 border-b border-line pb-2.5'
-                      >
-                        <span>{divida.descricao}</span>
-                        <strong>{formatCurrency(divida.valor)}</strong>
-                      </li>
-                    ))}
-                  </ul>
-                </DialogContent>
-              </Dialog>
-            </td>
-            <td>{formatCurrency(totalNaoParcelavel)}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+        </ul>
+      </DialogContent>
+    </Dialog>
+  );
+
+  return (
+    <>
+      <div className='hidden overflow-x-auto border border-line md:block'>
+        <table className='w-full border-collapse bg-white [&_td]:border-b [&_td]:border-line [&_td]:p-3 [&_td]:text-left [&_td]:text-[0.86rem] [&_th]:border-b [&_th]:border-line [&_th]:p-3 [&_th]:text-left [&_th]:text-[0.86rem]'>
+          <thead>
+            <tr>
+              <th></th>
+              <th>Vlr Lançado</th>
+              <th>Vlr Atualizado</th>
+              <th>Jur/Mul/Desc</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            {linhas.map(({ label, grupo }) => (
+              <tr key={label}>
+                <td>
+                  <strong>{label}</strong>
+                  <small className='mt-1 block text-[0.72rem] text-ink-soft'>
+                    {grupo.length} débito(s) / Qtd Guias: {grupo.length ? 1 : 0}
+                  </small>
+                </td>
+                <td>{formatCurrency(somar(grupo, 'valorLancado'))}</td>
+                <td>{formatCurrency(somar(grupo, 'valorAtualizado'))}</td>
+                <td>{formatCurrency(somar(grupo, 'jurosMultaDesconto'))}</td>
+                <td>{formatCurrency(somar(grupo, 'total'))}</td>
+              </tr>
+            ))}
+            <tr>
+              <td>
+                <strong>Dívida(s) que não podem ser parceladas</strong>
+              </td>
+              <td colSpan={3}>{dialogDividasNaoParcelaveis}</td>
+              <td>{formatCurrency(totalNaoParcelavel)}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div className='grid gap-3 md:hidden'>
+        {linhas.map(({ label, grupo }) => (
+          <div
+            key={label}
+            className='grid gap-2 border border-line bg-white p-3 text-[0.86rem]'
+          >
+            <div>
+              <strong>{label}</strong>
+              <small className='mt-1 block text-[0.72rem] text-ink-soft'>
+                {grupo.length} débito(s) / Qtd Guias: {grupo.length ? 1 : 0}
+              </small>
+            </div>
+            <div className='grid grid-cols-2 gap-x-3 gap-y-1'>
+              <span className='text-ink-soft'>Vlr Lançado</span>
+              <span className='text-right'>
+                {formatCurrency(somar(grupo, 'valorLancado'))}
+              </span>
+              <span className='text-ink-soft'>Vlr Atualizado</span>
+              <span className='text-right'>
+                {formatCurrency(somar(grupo, 'valorAtualizado'))}
+              </span>
+              <span className='text-ink-soft'>Jur/Mul/Desc</span>
+              <span className='text-right'>
+                {formatCurrency(somar(grupo, 'jurosMultaDesconto'))}
+              </span>
+              <span className='font-extrabold text-ink-soft'>Total</span>
+              <span className='text-right font-extrabold'>
+                {formatCurrency(somar(grupo, 'total'))}
+              </span>
+            </div>
+          </div>
+        ))}
+
+        <div className='grid gap-2 border border-line bg-white p-3 text-[0.86rem]'>
+          <strong>Dívida(s) que não podem ser parceladas</strong>
+          <div className='flex items-center justify-between gap-3'>
+            {dialogDividasNaoParcelaveis}
+            <span className='font-extrabold'>
+              {formatCurrency(totalNaoParcelavel)}
+            </span>
+          </div>
+        </div>
+      </div>
+    </>
   );
 }
