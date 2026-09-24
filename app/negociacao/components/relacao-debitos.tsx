@@ -130,7 +130,7 @@ export default function RelacaoDebitos({ debitos }: RelacaoDebitosProps) {
         }
       />
 
-      <div className='hidden md:block'>
+      <div className='hidden min-w-0 md:block'>
         <TabelaDebitos
           debitos={debitosFiltrados}
           selecionados={selecionados}

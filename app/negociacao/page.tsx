@@ -17,7 +17,7 @@ export default async function NegociacaoPage({
 
   return (
     <main className='bg-sand py-15 md:py-22'>
-      <div className='mx-auto w-[min(1120px,calc(100%-48px))]'>
+      <div className='mx-auto w-[min(1440px,calc(100%-48px))]'>
         <p className='mb-3.5 text-[0.74rem] font-extrabold tracking-[0.14em] text-orange uppercase'>
           Negociação de débitos
         </p>
