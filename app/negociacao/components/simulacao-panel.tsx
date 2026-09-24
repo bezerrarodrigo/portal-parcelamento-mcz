@@ -13,12 +13,20 @@ const VALOR_MINIMO_PARCELA = 0;
 
 interface SimulacaoPanelProps {
   selecionados: Debito[];
+  quantidadeParcelas: number;
+  onQuantidadeParcelasChange: (valor: number) => void;
+  resultadoVisivel: boolean;
+  onResultadoVisivelChange: (valor: boolean) => void;
 }
 
-export default function SimulacaoPanel({ selecionados }: SimulacaoPanelProps) {
-  const [quantidadeParcelas, setQuantidadeParcelas] = useState(1);
+export default function SimulacaoPanel({
+  selecionados,
+  quantidadeParcelas,
+  onQuantidadeParcelasChange,
+  resultadoVisivel,
+  onResultadoVisivelChange,
+}: SimulacaoPanelProps) {
   const [valorEntrada, setValorEntrada] = useState(0);
-  const [resultadoVisivel, setResultadoVisivel] = useState(false);
 
   const valorLancadoSelecionado = selecionados.reduce(
     (total, debito) => total + debito.valorLancado,
@@ -37,7 +45,7 @@ export default function SimulacaoPanel({ selecionados }: SimulacaoPanelProps) {
   });
 
   function handleSimular() {
-    setResultadoVisivel(true);
+    onResultadoVisivelChange(true);
   }
 
   return (
@@ -57,8 +65,8 @@ export default function SimulacaoPanel({ selecionados }: SimulacaoPanelProps) {
             max={QUANTIDADE_MAXIMA_PARCELAS}
             value={quantidadeParcelas}
             onChange={(event) => {
-              setResultadoVisivel(false);
-              setQuantidadeParcelas(Number(event.target.value));
+              onResultadoVisivelChange(false);
+              onQuantidadeParcelasChange(Number(event.target.value));
             }}
           />
         </div>
@@ -76,7 +84,7 @@ export default function SimulacaoPanel({ selecionados }: SimulacaoPanelProps) {
             step='0.01'
             value={valorEntrada}
             onChange={(event) => {
-              setResultadoVisivel(false);
+              onResultadoVisivelChange(false);
               setValorEntrada(Number(event.target.value));
             }}
           />

@@ -29,6 +29,8 @@ export default function RelacaoDebitos({ debitos }: RelacaoDebitosProps) {
   const [selecionados, setSelecionados] = useState<Set<string>>(
     () => new Set(debitos.map((debito) => debito.id)),
   );
+  const [quantidadeParcelas, setQuantidadeParcelas] = useState(1);
+  const [resultadoVisivel, setResultadoVisivel] = useState(false);
 
   const tributos = useMemo(
     () => Array.from(new Set(debitos.map((debito) => debito.tributo))),
@@ -69,15 +71,18 @@ export default function RelacaoDebitos({ debitos }: RelacaoDebitosProps) {
   const dividasNaoParcelaveis = useMemo(() => getDividasNaoParcelaveis(), []);
 
   function handleToggle(id: string) {
-    setSelecionados((atual) => {
-      const proximo = new Set(atual);
-      if (proximo.has(id)) {
-        proximo.delete(id);
-      } else {
-        proximo.add(id);
-      }
-      return proximo;
-    });
+    const proximo = new Set(selecionados);
+    const estavaSelecionado = proximo.has(id);
+
+    if (estavaSelecionado) {
+      proximo.delete(id);
+    } else {
+      proximo.add(id);
+      setQuantidadeParcelas(0);
+      setResultadoVisivel(true);
+    }
+
+    setSelecionados(proximo);
   }
 
   function handleToggleAll() {
@@ -85,21 +90,24 @@ export default function RelacaoDebitos({ debitos }: RelacaoDebitosProps) {
       return;
     }
 
-    setSelecionados((atual) => {
-      const proximo = new Set(atual);
-      const idsFiltrados = debitosFiltrados.map((debito) => debito.id);
-      const deveSelecionar = idsFiltrados.some((id) => !proximo.has(id));
+    const proximo = new Set(selecionados);
+    const idsFiltrados = debitosFiltrados.map((debito) => debito.id);
+    const deveSelecionar = idsFiltrados.some((id) => !proximo.has(id));
 
-      idsFiltrados.forEach((id) => {
-        if (deveSelecionar) {
-          proximo.add(id);
-        } else {
-          proximo.delete(id);
-        }
-      });
-
-      return proximo;
+    idsFiltrados.forEach((id) => {
+      if (deveSelecionar) {
+        proximo.add(id);
+      } else {
+        proximo.delete(id);
+      }
     });
+
+    setSelecionados(proximo);
+
+    if (deveSelecionar) {
+      setQuantidadeParcelas(0);
+      setResultadoVisivel(true);
+    }
   }
 
   return (
@@ -149,7 +157,13 @@ export default function RelacaoDebitos({ debitos }: RelacaoDebitosProps) {
         dividasNaoParcelaveis={dividasNaoParcelaveis}
       />
 
-      <SimulacaoPanel selecionados={debitosSelecionados} />
+      <SimulacaoPanel
+        selecionados={debitosSelecionados}
+        quantidadeParcelas={quantidadeParcelas}
+        onQuantidadeParcelasChange={setQuantidadeParcelas}
+        resultadoVisivel={resultadoVisivel}
+        onResultadoVisivelChange={setResultadoVisivel}
+      />
 
       <FormularioConfirmacao podeEnviar={debitosSelecionados.length > 0} />
     </div>
