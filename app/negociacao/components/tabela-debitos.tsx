@@ -19,6 +19,8 @@ interface TabelaDebitosProps {
   debitos: Debito[];
   selecionados: Set<string>;
   onToggle: (id: string) => void;
+  onToggleAll: () => void;
+  todosSelecionados: boolean;
 }
 
 const ITENS_POR_PAGINA = 10;
@@ -27,6 +29,8 @@ export default function TabelaDebitos({
   debitos,
   selecionados,
   onToggle,
+  onToggleAll,
+  todosSelecionados,
 }: TabelaDebitosProps) {
   const [pagina, setPagina] = useState(1);
 
@@ -45,7 +49,17 @@ export default function TabelaDebitos({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead />
+              <TableHead className='w-10'>
+                <Checkbox
+                  checked={debitos.length > 0 && todosSelecionados}
+                  onCheckedChange={() => onToggleAll()}
+                  aria-label={
+                    todosSelecionados
+                      ? 'Desmarcar todos os débitos da pesquisa'
+                      : 'Marcar todos os débitos da pesquisa'
+                  }
+                />
+              </TableHead>
               <TableHead>Tributo</TableHead>
               <TableHead>Exercício</TableHead>
               <TableHead>Parcela</TableHead>

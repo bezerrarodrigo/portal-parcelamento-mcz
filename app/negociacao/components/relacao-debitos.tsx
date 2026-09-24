@@ -62,6 +62,9 @@ export default function RelacaoDebitos({ debitos }: RelacaoDebitosProps) {
     () => debitos.filter((debito) => selecionados.has(debito.id)),
     [debitos, selecionados],
   );
+  const todosDebitosFiltradosSelecionados =
+    debitosFiltrados.length > 0 &&
+    debitosFiltrados.every((debito) => selecionados.has(debito.id));
 
   const dividasNaoParcelaveis = useMemo(() => getDividasNaoParcelaveis(), []);
 
@@ -73,6 +76,28 @@ export default function RelacaoDebitos({ debitos }: RelacaoDebitosProps) {
       } else {
         proximo.add(id);
       }
+      return proximo;
+    });
+  }
+
+  function handleToggleAll() {
+    if (debitosFiltrados.length === 0) {
+      return;
+    }
+
+    setSelecionados((atual) => {
+      const proximo = new Set(atual);
+      const idsFiltrados = debitosFiltrados.map((debito) => debito.id);
+      const deveSelecionar = idsFiltrados.some((id) => !proximo.has(id));
+
+      idsFiltrados.forEach((id) => {
+        if (deveSelecionar) {
+          proximo.add(id);
+        } else {
+          proximo.delete(id);
+        }
+      });
+
       return proximo;
     });
   }
@@ -102,6 +127,8 @@ export default function RelacaoDebitos({ debitos }: RelacaoDebitosProps) {
           debitos={debitosFiltrados}
           selecionados={selecionados}
           onToggle={handleToggle}
+          onToggleAll={handleToggleAll}
+          todosSelecionados={todosDebitosFiltradosSelecionados}
         />
       </div>
       <div className='block md:hidden'>
@@ -109,6 +136,8 @@ export default function RelacaoDebitos({ debitos }: RelacaoDebitosProps) {
           debitos={debitosFiltrados}
           selecionados={selecionados}
           onToggle={handleToggle}
+          onToggleAll={handleToggleAll}
+          todosSelecionados={todosDebitosFiltradosSelecionados}
         />
       </div>
 

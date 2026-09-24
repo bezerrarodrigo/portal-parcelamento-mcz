@@ -8,12 +8,16 @@ interface CartoesDebitosProps {
   debitos: Debito[];
   selecionados: Set<string>;
   onToggle: (id: string) => void;
+  onToggleAll: () => void;
+  todosSelecionados: boolean;
 }
 
 export default function CartoesDebitos({
   debitos,
   selecionados,
   onToggle,
+  onToggleAll,
+  todosSelecionados,
 }: CartoesDebitosProps) {
   if (debitos.length === 0) {
     return (
@@ -25,6 +29,20 @@ export default function CartoesDebitos({
 
   return (
     <div className='grid gap-3.5'>
+      <div className='flex items-center justify-between rounded-md border border-line bg-white px-3 py-2'>
+        <label className='flex items-center gap-2 text-sm font-medium text-ink'>
+          <Checkbox
+            checked={debitos.length > 0 && todosSelecionados}
+            onCheckedChange={() => onToggleAll()}
+            aria-label={
+              todosSelecionados
+                ? 'Desmarcar todos os débitos da pesquisa'
+                : 'Marcar todos os débitos da pesquisa'
+            }
+          />
+          {todosSelecionados ? 'Desmarcar todos' : 'Marcar todos'}
+        </label>
+      </div>
       {debitos.map((debito) => (
         <article className='border border-line bg-white p-4.5' key={debito.id}>
           <header className='mb-3 flex items-center justify-between border-b border-line pb-3'>
