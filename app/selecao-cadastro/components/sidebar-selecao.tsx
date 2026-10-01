@@ -1,4 +1,5 @@
-import { User } from 'lucide-react';
+import { User, LogOut } from 'lucide-react';
+import Link from 'next/link';
 
 export default function SidebarSelecao() {
   return (
@@ -11,6 +12,15 @@ export default function SidebarSelecao() {
           Selecionar cadastro
         </span>
       </div>
+      <Link
+        href='/'
+        className='flex items-center gap-2 text-center text-ink-soft no-underline hover:text-orange md:flex-col md:gap-2'
+      >
+        <span className='flex size-10 items-center justify-center rounded-full bg-sand'>
+          <LogOut size={20} />
+        </span>
+        <span className='text-[0.72rem] font-semibold'>Sair</span>
+      </Link>
     </aside>
   );
 }

@@ -5,8 +5,9 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { filtrarCadastros, getCadastros } from '@/lib/mock-cadastros';
 import FiltroCadastro, { TODOS } from './components/filtro-cadastro';
-import SidebarSelecao from './components/sidebar-selecao';
+
 import TabelaCadastros from './components/tabela-cadastros';
+import SidebarSelecao from './components/sidebar-selecao';
 
 export default function SelecaoCadastroPage() {
   const router = useRouter();
