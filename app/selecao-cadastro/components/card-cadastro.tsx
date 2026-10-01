@@ -25,7 +25,7 @@ export default function CardCadastro({
         <div className='flex items-center gap-2'>
           <input
             type='radio'
-            name='cadastro-selecionado'
+            name='cadastro-selecionado-mobile'
             checked={selecionado}
             onChange={() => onSelecionar(cadastro.id)}
             aria-label={`Selecionar cadastro ${cadastro.nomeRazaoSocial}`}

@@ -61,7 +61,7 @@ export default function TabelaCadastros({
                   <TableCell className='text-center'>
                     <input
                       type='radio'
-                      name='cadastro-selecionado'
+                      name='cadastro-selecionado-desktop'
                       checked={selecionado === item.id}
                       onChange={() => onSelecionar(item.id)}
                       aria-label={`Selecionar cadastro ${item.nomeRazaoSocial}`}
