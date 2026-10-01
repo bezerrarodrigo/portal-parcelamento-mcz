@@ -18,8 +18,8 @@ interface DebitosResumoProps {
 
 const chartConfig = {
   valor: { label: 'Valor' },
-  vencidos: { label: 'Vencidos', color: '#dc5b4e' },
-  aVencer: { label: 'A vencer', color: '#2e9e5b' },
+  vencidos: { label: 'Vencidos', color: '#e97832' },
+  aVencer: { label: 'A vencer', color: '#075985' },
 } satisfies ChartConfig;
 
 export default function DebitosResumo({
