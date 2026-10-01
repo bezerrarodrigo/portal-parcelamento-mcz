@@ -12,7 +12,15 @@ export interface Cadastro {
   situacao: 'Ativo' | 'Inativo';
 }
 
-export const tiposCadastro = ['Imóvel', 'Empresa', 'Pessoa'] as const;
+export const tiposCadastro = [
+  'Autônomo',
+  'Empresa',
+  'Pessoa',
+  'Proprietário',
+  'Sócio Administrador',
+  'Contador',
+  'Imóvel - Resp. tributário',
+] as const;
 
 const cadastrosMock: Cadastro[] = [
   {

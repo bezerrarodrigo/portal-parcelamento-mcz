@@ -45,7 +45,7 @@ export default function TabelaCadastros({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className='w-10'>Selecione</TableHead>
+                <TableHead className='w-10 text-center'>Selecione</TableHead>
                 <TableHead>Cadastro</TableHead>
                 <TableHead>CPF/CNPJ</TableHead>
                 <TableHead>Insc. municipal</TableHead>
@@ -58,7 +58,7 @@ export default function TabelaCadastros({
             <TableBody>
               {cadastros.map((item) => (
                 <TableRow key={item.id}>
-                  <TableCell>
+                  <TableCell className='text-center'>
                     <input
                       type='radio'
                       name='cadastro-selecionado'
