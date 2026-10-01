@@ -4,8 +4,8 @@ import Link from 'next/link';
 export default function SidebarSelecao() {
   return (
     <aside className='flex shrink-0 gap-4 border-b border-line bg-white px-4 py-3 md:w-27 md:flex-col md:items-center md:gap-6 md:border-r md:border-b-0 md:py-8'>
-      <div className='flex items-center gap-2 text-center text-ink-soft md:flex-col md:gap-2'>
-        <span className='flex size-10 items-center justify-center rounded-full bg-sand text-ink'>
+      <div className='flex items-center gap-2 text-center text-orange md:flex-col md:gap-2'>
+        <span className='flex size-10 items-center justify-center rounded-full bg-orange text-white'>
           <User size={20} />
         </span>
         <span className='text-[0.72rem] font-semibold'>

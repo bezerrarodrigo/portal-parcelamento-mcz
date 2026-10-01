@@ -1,3 +1,5 @@
+'use client';
+
 import {
   User,
   FileText,
@@ -7,6 +9,8 @@ import {
   LogOut,
 } from 'lucide-react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { cn } from '@/lib/utils';
 
 interface ItemNavegacao {
   label: string;
@@ -39,13 +43,21 @@ const itens: ItemNavegacao[] = [
 ];
 
 export default function SidebarNavegacao() {
+  const pathname = usePathname();
+
   return (
     <aside className='flex shrink-0 flex-wrap gap-4 border-b border-line bg-white px-4 py-3 md:w-32 md:flex-col md:flex-nowrap md:items-center md:gap-6 md:border-r md:border-b-0 md:py-8'>
       {itens.map((item) => {
         const Icon = item.icon;
+        const ativo = item.habilitado && pathname === item.href;
         const conteudo = (
           <>
-            <span className='flex size-10 items-center justify-center rounded-full bg-sand'>
+            <span
+              className={cn(
+                'flex size-10 items-center justify-center rounded-full bg-sand',
+                ativo && 'bg-orange text-white',
+              )}
+            >
               <Icon size={20} />
             </span>
             <span className='text-[0.7rem] font-semibold'>{item.label}</span>
@@ -68,7 +80,11 @@ export default function SidebarNavegacao() {
           <Link
             key={item.label}
             href={item.href}
-            className='flex items-center gap-2 text-center text-ink-soft no-underline hover:text-orange md:flex-col md:gap-2'
+            aria-current={ativo ? 'page' : undefined}
+            className={cn(
+              'flex items-center gap-2 text-center text-ink-soft no-underline hover:text-orange md:flex-col md:gap-2',
+              ativo && 'text-orange',
+            )}
           >
             {conteudo}
           </Link>
