@@ -25,7 +25,7 @@ const itens: ItemNavegacao[] = [
   { label: 'Parcelamento', href: '/negociacao', icon: Archive },
 ];
 
-export default function SidebarDashboard() {
+export default function SidebarNavegacao() {
   return (
     <aside className='flex shrink-0 flex-wrap gap-4 border-b border-line bg-white px-4 py-3 md:w-32 md:flex-col md:flex-nowrap md:items-center md:gap-6 md:border-r md:border-b-0 md:py-8'>
       {itens.map((item) => {

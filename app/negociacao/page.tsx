@@ -1,4 +1,5 @@
 import { getDebitosPorInscricao } from '@/lib/mock-debitos';
+import SidebarNavegacao from '../components/sidebar-navegacao';
 import RelacaoDebitos from './components/relacao-debitos';
 
 interface NegociacaoPageProps {
@@ -16,8 +17,10 @@ export default async function NegociacaoPage({
   const debitos = getDebitosPorInscricao(inscricao ?? '');
 
   return (
-    <main className='bg-sand py-15 md:py-22'>
-      <div className='mx-auto w-[min(1440px,calc(100%-48px))]'>
+    <main className='flex min-h-[calc(100vh-82px)] flex-col bg-sand md:flex-row'>
+      <SidebarNavegacao />
+
+      <div className='mx-auto w-full max-w-360 flex-1 px-4 py-8 md:px-10 md:py-10'>
         <p className='mb-3.5 text-[0.74rem] font-extrabold tracking-[0.14em] text-orange uppercase'>
           Negociação de débitos
         </p>
