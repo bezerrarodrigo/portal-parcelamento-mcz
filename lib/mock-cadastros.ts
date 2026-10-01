@@ -159,6 +159,12 @@ export function getCadastros(): Cadastro[] {
   return cadastrosMock;
 }
 
+export function getCadastroPorInscricao(
+  inscricao: string,
+): Cadastro | undefined {
+  return cadastrosMock.find((item) => item.inscricaoMunicipal === inscricao);
+}
+
 interface FiltroCadastros {
   cadastro?: string;
   texto?: string;
