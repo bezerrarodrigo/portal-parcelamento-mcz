@@ -1,6 +1,5 @@
 import {
   User,
-  LogOut,
   FileText,
   Receipt,
   FileSpreadsheet,
@@ -18,7 +17,6 @@ interface ItemNavegacao {
 
 const itens: ItemNavegacao[] = [
   { label: 'Selecionar cadastro', href: '/selecao-cadastro', icon: User },
-  { label: 'Voltar', href: '/selecao-cadastro', icon: LogOut },
   { label: 'Guia / Extrato Débito', href: '/dashboard', icon: FileText },
   { label: 'Extrato de pagamento', href: '/dashboard', icon: Receipt },
   {
@@ -32,7 +30,7 @@ const itens: ItemNavegacao[] = [
 
 export default function SidebarDashboard() {
   return (
-    <aside className='flex shrink-0 flex-wrap gap-4 border-b border-line bg-white px-4 py-3 md:w-[128px] md:flex-col md:flex-nowrap md:items-center md:gap-6 md:border-r md:border-b-0 md:py-8'>
+    <aside className='flex shrink-0 flex-wrap gap-4 border-b border-line bg-white px-4 py-3 md:w-32 md:flex-col md:flex-nowrap md:items-center md:gap-6 md:border-r md:border-b-0 md:py-8'>
       {itens.map((item) => {
         const Icon = item.icon;
         return (
