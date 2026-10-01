@@ -6,13 +6,11 @@ import {
   Archive,
 } from 'lucide-react';
 import Link from 'next/link';
-import { cn } from '@/lib/utils';
 
 interface ItemNavegacao {
   label: string;
   href: string;
   icon: React.ComponentType<{ size?: number }>;
-  destaque?: boolean;
 }
 
 const itens: ItemNavegacao[] = [
@@ -23,9 +21,8 @@ const itens: ItemNavegacao[] = [
     label: 'Extrato de parcelamento',
     href: '/dashboard',
     icon: FileSpreadsheet,
-    destaque: true,
   },
-  { label: 'Parcelamento', href: '/negociacao', icon: Archive, destaque: true },
+  { label: 'Parcelamento', href: '/negociacao', icon: Archive },
 ];
 
 export default function SidebarDashboard() {
@@ -37,12 +34,7 @@ export default function SidebarDashboard() {
           <Link
             key={item.label}
             href={item.href}
-            className={cn(
-              'flex items-center gap-2 text-center no-underline md:flex-col md:gap-2',
-              item.destaque
-                ? 'text-red-500 hover:text-red-600'
-                : 'text-ink-soft hover:text-orange',
-            )}
+            className='flex items-center gap-2 text-center text-ink-soft no-underline hover:text-orange md:flex-col md:gap-2'
           >
             <span className='flex size-10 items-center justify-center rounded-full bg-sand'>
               <Icon size={20} />
