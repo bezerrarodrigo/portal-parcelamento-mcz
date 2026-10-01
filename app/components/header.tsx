@@ -78,7 +78,7 @@ export default function Header() {
               ))}
               <Link
                 className='mt-3 inline-flex min-h-11 items-center justify-center gap-2 rounded border-0 bg-orange px-4.5 text-[0.84rem] font-bold text-white no-underline transition-[transform,background-color] duration-200 hover:-translate-y-px hover:bg-[#cf5f21] focus-visible:outline-[3px] focus-visible:outline-offset-[3px] focus-visible:outline-[#f6b65b]'
-                href='/servicos/cidadao/guia'
+                href='/selecao-cadastro'
               >
                 Entrar no portal
               </Link>
@@ -103,7 +103,7 @@ export default function Header() {
         </nav>
         <Link
           className='hidden min-h-11 items-center justify-center gap-2 rounded bg-orange px-4.5 text-[0.84rem] font-bold text-white no-underline transition-[transform,background-color] duration-200 hover:-translate-y-px hover:bg-[#cf5f21] focus-visible:outline-[3px] focus-visible:outline-offset-[3px] focus-visible:outline-[#f6b65b] md:inline-flex'
-          href='/servicos/cidadao/guia'
+          href='/selecao-cadastro'
         >
           Acessar portal
         </Link>

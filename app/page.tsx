@@ -121,7 +121,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className='bg-sand py-15 md:py-22' id='negociacao'>
+      {/* <section className='bg-sand py-15 md:py-22' id='negociacao'>
         <div className='mx-auto w-[min(1120px,calc(100%-48px))]'>
           <div className='mb-6.5 max-w-160 md:mb-8.5'>
             <p className='mb-3.5 text-[0.74rem] font-extrabold tracking-[0.14em] text-orange uppercase'>
@@ -156,7 +156,7 @@ export default function Home() {
             })}
           </div>
         </div>
-      </section>
+      </section> */}
 
       <section className='bg-blue py-[78px]' id='servicos'>
         <div className='mx-auto w-[min(1120px,calc(100%-48px))]'>
