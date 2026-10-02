@@ -1,4 +1,5 @@
-import { apiClient } from '@/lib/http-client';
+import axios from 'axios';
+import { internalApiClient } from '@/lib/http-client';
 import type { Cadastro } from '@/lib/mock-cadastros';
 
 interface CadastroApiItem {
@@ -47,14 +48,25 @@ function mapearCadastro(item: CadastroApiItem): Cadastro {
 export async function listarCadastrosPorCpfCnpj(
   cpfCnpj: string,
 ): Promise<Cadastro[]> {
-  const { data } = await apiClient.get<ListaCadastrosResponse>(
-    '/cadastro/lista',
-    { params: { cpfCnpjLogado: cpfCnpj } },
-  );
+  try {
+    const { data } = await internalApiClient.get<ListaCadastrosResponse>(
+      '/cadastro/lista',
+      { params: { cpfCnpjLogado: cpfCnpj } },
+    );
 
-  if (data.mensagens?.length) {
-    throw new Error(data.mensagens.join(' '));
+    if (data.mensagens?.length) {
+      throw new Error(data.mensagens.join(' '));
+    }
+
+    return (data.cadastros ?? []).map(mapearCadastro);
+  } catch (error) {
+    if (
+      axios.isAxiosError<ListaCadastrosResponse>(error) &&
+      error.response?.data?.mensagens?.length
+    ) {
+      throw new Error(error.response.data.mensagens.join(' '));
+    }
+
+    throw error;
   }
-
-  return (data.cadastros ?? []).map(mapearCadastro);
 }
