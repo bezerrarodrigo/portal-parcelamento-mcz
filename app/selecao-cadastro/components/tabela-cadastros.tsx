@@ -76,7 +76,7 @@ export default function TabelaCadastros({
                   <TableCell className='whitespace-normal'>
                     {item.nomeRazaoSocial}
                   </TableCell>
-                  <TableCell className='min-w-70 whitespace-normal'>
+                  <TableCell className='min-w-lg whitespace-normal'>
                     {item.endereco}
                   </TableCell>
                   <TableCell>{item.vinculoCadastral}</TableCell>
