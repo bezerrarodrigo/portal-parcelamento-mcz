@@ -1,5 +1,5 @@
-// Dados mockados para o protótipo da tela de seleção de cadastro.
-// Futuramente devem ser substituídos pela resposta de uma API REST.
+// Dados mockados usados pelo dashboard (/app/dashboard). A tela de seleção de
+// cadastro já consome a API real em lib/api/cadastros.ts.
 
 export interface Cadastro {
   id: string;
@@ -9,18 +9,10 @@ export interface Cadastro {
   nomeRazaoSocial: string;
   endereco: string;
   vinculoCadastral: string;
-  situacao: 'Ativo' | 'Inativo';
+  situacao: string;
 }
 
-export const tiposCadastro = [
-  'Autônomo',
-  'Empresa',
-  'Pessoa',
-  'Proprietário',
-  'Sócio Administrador',
-  'Contador',
-  'Imóvel - Resp. tributário',
-] as const;
+export const tiposCadastro = ['Imóvel', 'Empresa', 'Pessoa'] as const;
 
 const cadastrosMock: Cadastro[] = [
   {
@@ -155,35 +147,8 @@ const cadastrosMock: Cadastro[] = [
   },
 ];
 
-export function getCadastros(): Cadastro[] {
-  return cadastrosMock;
-}
-
 export function getCadastroPorInscricao(
   inscricao: string,
 ): Cadastro | undefined {
   return cadastrosMock.find((item) => item.inscricaoMunicipal === inscricao);
-}
-
-interface FiltroCadastros {
-  cadastro?: string;
-  texto?: string;
-}
-
-export function filtrarCadastros({
-  cadastro,
-  texto,
-}: FiltroCadastros): Cadastro[] {
-  const termo = texto?.trim().toLowerCase() ?? '';
-
-  return cadastrosMock.filter((item) => {
-    const combinaCadastro = !cadastro || item.cadastro === cadastro;
-    const combinaTexto =
-      !termo ||
-      item.nomeRazaoSocial.toLowerCase().includes(termo) ||
-      item.inscricaoMunicipal.toLowerCase().includes(termo) ||
-      (item.cpfCnpj?.toLowerCase().includes(termo) ?? false);
-
-    return combinaCadastro && combinaTexto;
-  });
 }

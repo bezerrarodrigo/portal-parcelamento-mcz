@@ -1,28 +1,66 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
-import { filtrarCadastros, getCadastros } from '@/lib/mock-cadastros';
+import { listarCadastrosPorCpfCnpj } from '@/lib/api/cadastros';
+import type { Cadastro } from '@/lib/mock-cadastros';
 import FiltroCadastro, { TODOS } from './components/filtro-cadastro';
 
 import TabelaCadastros from './components/tabela-cadastros';
 import SidebarSelecao from './components/sidebar-selecao';
+
+// CPF/CNPJ fixo até a autenticação do usuário estar disponível e fornecer o valor real.
+const CPF_CNPJ_AUTENTICADO = '77877877838';
 
 export default function SelecaoCadastroPage() {
   const router = useRouter();
   const [cadastroFiltro, setCadastroFiltro] = useState(TODOS);
   const [textoFiltro, setTextoFiltro] = useState('');
   const [pesquisa, setPesquisa] = useState({ cadastro: TODOS, texto: '' });
+  const [todosCadastros, setTodosCadastros] = useState<Cadastro[]>([]);
+  const [carregando, setCarregando] = useState(false);
   const [selecionado, setSelecionado] = useState<string | null>(null);
 
-  const cadastros = useMemo(() => {
-    const cadastro =
-      pesquisa.cadastro === TODOS ? undefined : pesquisa.cadastro;
-    return filtrarCadastros({ cadastro, texto: pesquisa.texto });
-  }, [pesquisa]);
+  useEffect(() => {
+    async function carregarCadastros() {
+      setCarregando(true);
 
-  const cadastroSelecionado = getCadastros().find(
+      try {
+        const resultado = await listarCadastrosPorCpfCnpj(CPF_CNPJ_AUTENTICADO);
+        setTodosCadastros(resultado);
+      } catch (error) {
+        const mensagem =
+          error instanceof Error
+            ? error.message
+            : 'Não foi possível carregar os cadastros. Tente novamente.';
+        toast.error(mensagem);
+      } finally {
+        setCarregando(false);
+      }
+    }
+
+    carregarCadastros();
+  }, []);
+
+  const cadastros = useMemo(() => {
+    const termo = pesquisa.texto.trim().toLowerCase();
+
+    return todosCadastros.filter((item) => {
+      const combinaCadastro =
+        pesquisa.cadastro === TODOS || item.cadastro === pesquisa.cadastro;
+      const combinaTexto =
+        !termo ||
+        item.nomeRazaoSocial.toLowerCase().includes(termo) ||
+        item.inscricaoMunicipal.toLowerCase().includes(termo) ||
+        (item.cpfCnpj?.toLowerCase().includes(termo) ?? false);
+
+      return combinaCadastro && combinaTexto;
+    });
+  }, [todosCadastros, pesquisa]);
+
+  const cadastroSelecionado = todosCadastros.find(
     (item) => item.id === selecionado,
   );
 
@@ -35,6 +73,7 @@ export default function SelecaoCadastroPage() {
 
     const params = new URLSearchParams({
       inscricao: cadastroSelecionado.inscricaoMunicipal,
+      id: cadastroSelecionado.id,
     });
 
     router.push(`/dashboard?${params.toString()}`);
@@ -61,6 +100,7 @@ export default function SelecaoCadastroPage() {
 
         <TabelaCadastros
           cadastros={cadastros}
+          carregando={carregando}
           selecionado={selecionado}
           onSelecionar={setSelecionado}
         />

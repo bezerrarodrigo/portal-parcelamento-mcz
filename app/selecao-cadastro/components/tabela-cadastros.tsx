@@ -13,15 +13,21 @@ import CardCadastro from './card-cadastro';
 
 interface TabelaCadastrosProps {
   cadastros: Cadastro[];
+  carregando?: boolean;
   selecionado: string | null;
   onSelecionar: (id: string) => void;
 }
 
 export default function TabelaCadastros({
   cadastros,
+  carregando = false,
   selecionado,
   onSelecionar,
 }: TabelaCadastrosProps) {
+  const mensagemVazio = carregando
+    ? 'Carregando cadastros...'
+    : 'Nenhum cadastro encontrado para os filtros selecionados.';
+
   return (
     <>
       <div className='flex flex-col gap-3 md:hidden'>
@@ -35,7 +41,7 @@ export default function TabelaCadastros({
         ))}
         {cadastros.length === 0 && (
           <p className='border border-line bg-white p-4 text-center text-ink-soft'>
-            Nenhum cadastro encontrado para os filtros selecionados.
+            {mensagemVazio}
           </p>
         )}
       </div>
@@ -76,7 +82,7 @@ export default function TabelaCadastros({
                   <TableCell className='whitespace-normal'>
                     {item.nomeRazaoSocial}
                   </TableCell>
-                  <TableCell className='min-w-70 whitespace-normal'>
+                  <TableCell className='min-w-lg whitespace-normal'>
                     {item.endereco}
                   </TableCell>
                   <TableCell>{item.vinculoCadastral}</TableCell>
@@ -86,7 +92,7 @@ export default function TabelaCadastros({
               {cadastros.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={8} className='text-center text-ink-soft'>
-                    Nenhum cadastro encontrado para os filtros selecionados.
+                    {mensagemVazio}
                   </TableCell>
                 </TableRow>
               )}

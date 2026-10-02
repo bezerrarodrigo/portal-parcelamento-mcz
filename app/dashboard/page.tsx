@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import { getCadastroPorInscricao } from '@/lib/mock-cadastros';
-import { getDebitosPorInscricao } from '@/lib/mock-debitos';
+import { obterResumoDebitos } from '@/lib/api/debitos';
 import SidebarNavegacao from '../components/sidebar-navegacao';
 import DadosImovel from './components/dados-imovel';
 import DebitosResumo from './components/debitos-resumo';
@@ -9,26 +9,28 @@ import MapaCard from './components/mapa-card';
 interface DashboardPageProps {
   searchParams: Promise<{
     inscricao?: string;
+    id?: string;
   }>;
 }
 
 export default async function DashboardPage({
   searchParams,
 }: DashboardPageProps) {
-  const { inscricao } = await searchParams;
+  const { inscricao, id } = await searchParams;
   const cadastro = inscricao ? getCadastroPorInscricao(inscricao) : undefined;
 
   if (!cadastro) {
     notFound();
   }
 
-  const debitos = getDebitosPorInscricao(cadastro.inscricaoMunicipal);
-  const vencidos = debitos
-    .filter((debito) => debito.atrasoDias !== null)
-    .reduce((soma, debito) => soma + debito.total, 0);
-  const aVencer = debitos
-    .filter((debito) => debito.atrasoDias === null)
-    .reduce((soma, debito) => soma + debito.total, 0);
+  // Sem o id do cadastro (codigoCadastro) não há como consultar o SIAT; mantém a tela de pé com totais zerados.
+  const { vencidos, aVencer, total } = id
+    ? await obterResumoDebitos(id).catch(() => ({
+        vencidos: 0,
+        aVencer: 0,
+        total: 0,
+      }))
+    : { vencidos: 0, aVencer: 0, total: 0 };
 
   return (
     <main className='flex min-h-[calc(100vh-82px)] flex-col bg-sand md:flex-row'>
@@ -40,11 +42,7 @@ export default async function DashboardPage({
           <MapaCard />
         </div>
 
-        <DebitosResumo
-          vencidos={vencidos}
-          aVencer={aVencer}
-          total={vencidos + aVencer}
-        />
+        <DebitosResumo vencidos={vencidos} aVencer={aVencer} total={total} />
       </div>
     </main>
   );
