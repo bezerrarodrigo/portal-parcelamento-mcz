@@ -73,6 +73,7 @@ export default function SelecaoCadastroPage() {
 
     const params = new URLSearchParams({
       inscricao: cadastroSelecionado.inscricaoMunicipal,
+      id: cadastroSelecionado.id,
     });
 
     router.push(`/dashboard?${params.toString()}`);
