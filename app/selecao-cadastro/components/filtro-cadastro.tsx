@@ -10,14 +10,13 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { tiposCadastro } from '@/lib/mock-cadastros';
-import { Loader2, Search } from 'lucide-react';
+import { Search } from 'lucide-react';
 
 const TODOS = 'todos';
 
 interface FiltroCadastroProps {
   cadastro: string;
   texto: string;
-  carregando?: boolean;
   onCadastroChange: (cadastro: string) => void;
   onTextoChange: (texto: string) => void;
   onPesquisar: () => void;
@@ -26,7 +25,6 @@ interface FiltroCadastroProps {
 export default function FiltroCadastro({
   cadastro,
   texto,
-  carregando = false,
   onCadastroChange,
   onTextoChange,
   onPesquisar,
@@ -50,7 +48,7 @@ export default function FiltroCadastro({
       <Input
         value={texto}
         onChange={(event) => onTextoChange(event.target.value)}
-        placeholder='CPF/CNPJ'
+        placeholder='CPF/CNPJ, inscrição ou nome'
         className='w-full md:flex-1'
         onKeyDown={(event) => {
           if (event.key === 'Enter') {
@@ -62,15 +60,10 @@ export default function FiltroCadastro({
       <Button
         type='button'
         onClick={onPesquisar}
-        disabled={carregando}
         className='w-full gap-2 md:w-auto'
       >
-        {carregando ? (
-          <Loader2 size={16} className='animate-spin' />
-        ) : (
-          <Search size={16} />
-        )}
-        {carregando ? 'Pesquisando...' : 'Pesquisar'}
+        <Search size={16} />
+        Pesquisar
       </Button>
     </div>
   );

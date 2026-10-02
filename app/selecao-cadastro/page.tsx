@@ -1,60 +1,71 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { listarCadastrosPorCpfCnpj } from '@/lib/api/cadastros';
-import { isValidCpfCnpj, onlyDigits } from '@/lib/cpf-cnpj';
 import type { Cadastro } from '@/lib/mock-cadastros';
 import FiltroCadastro, { TODOS } from './components/filtro-cadastro';
 
 import TabelaCadastros from './components/tabela-cadastros';
 import SidebarSelecao from './components/sidebar-selecao';
 
+// CPF/CNPJ fixo até a autenticação do usuário estar disponível e fornecer o valor real.
+const CPF_CNPJ_AUTENTICADO = '77877877838';
+
 export default function SelecaoCadastroPage() {
   const router = useRouter();
   const [cadastroFiltro, setCadastroFiltro] = useState(TODOS);
   const [textoFiltro, setTextoFiltro] = useState('');
-  const [cadastros, setCadastros] = useState<Cadastro[]>([]);
+  const [pesquisa, setPesquisa] = useState({ cadastro: TODOS, texto: '' });
+  const [todosCadastros, setTodosCadastros] = useState<Cadastro[]>([]);
   const [carregando, setCarregando] = useState(false);
   const [selecionado, setSelecionado] = useState<string | null>(null);
 
-  const cadastrosFiltrados = useMemo(() => {
-    if (cadastroFiltro === TODOS) return cadastros;
-    return cadastros.filter((item) => item.cadastro === cadastroFiltro);
-  }, [cadastros, cadastroFiltro]);
+  useEffect(() => {
+    async function carregarCadastros() {
+      setCarregando(true);
 
-  const cadastroSelecionado = cadastros.find((item) => item.id === selecionado);
-
-  async function handlePesquisar() {
-    const cpfCnpj = onlyDigits(textoFiltro);
-
-    if (!isValidCpfCnpj(cpfCnpj)) {
-      toast.error('Informe um CPF/CNPJ válido para pesquisar.');
-      return;
-    }
-
-    setCarregando(true);
-    setSelecionado(null);
-
-    try {
-      const resultado = await listarCadastrosPorCpfCnpj(cpfCnpj);
-      setCadastros(resultado);
-
-      if (resultado.length === 0) {
-        toast.info('Nenhum cadastro encontrado para o CPF/CNPJ informado.');
+      try {
+        const resultado = await listarCadastrosPorCpfCnpj(CPF_CNPJ_AUTENTICADO);
+        setTodosCadastros(resultado);
+      } catch (error) {
+        const mensagem =
+          error instanceof Error
+            ? error.message
+            : 'Não foi possível carregar os cadastros. Tente novamente.';
+        toast.error(mensagem);
+      } finally {
+        setCarregando(false);
       }
-    } catch (error) {
-      setCadastros([]);
-      const mensagem =
-        error instanceof Error
-          ? error.message
-          : 'Não foi possível consultar os cadastros. Tente novamente.';
-      toast.error(mensagem);
-    } finally {
-      setCarregando(false);
     }
+
+    carregarCadastros();
+  }, []);
+
+  const cadastros = useMemo(() => {
+    const termo = pesquisa.texto.trim().toLowerCase();
+
+    return todosCadastros.filter((item) => {
+      const combinaCadastro =
+        pesquisa.cadastro === TODOS || item.cadastro === pesquisa.cadastro;
+      const combinaTexto =
+        !termo ||
+        item.nomeRazaoSocial.toLowerCase().includes(termo) ||
+        item.inscricaoMunicipal.toLowerCase().includes(termo) ||
+        (item.cpfCnpj?.toLowerCase().includes(termo) ?? false);
+
+      return combinaCadastro && combinaTexto;
+    });
+  }, [todosCadastros, pesquisa]);
+
+  const cadastroSelecionado = todosCadastros.find(
+    (item) => item.id === selecionado,
+  );
+
+  function handlePesquisar() {
+    setPesquisa({ cadastro: cadastroFiltro, texto: textoFiltro });
   }
 
   function handleSelecionar() {
@@ -80,7 +91,6 @@ export default function SelecaoCadastroPage() {
           <FiltroCadastro
             cadastro={cadastroFiltro}
             texto={textoFiltro}
-            carregando={carregando}
             onCadastroChange={setCadastroFiltro}
             onTextoChange={setTextoFiltro}
             onPesquisar={handlePesquisar}
@@ -88,7 +98,8 @@ export default function SelecaoCadastroPage() {
         </div>
 
         <TabelaCadastros
-          cadastros={cadastrosFiltrados}
+          cadastros={cadastros}
+          carregando={carregando}
           selecionado={selecionado}
           onSelecionar={setSelecionado}
         />
