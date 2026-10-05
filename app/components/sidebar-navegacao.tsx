@@ -1,5 +1,6 @@
 'use client';
 
+import { Suspense } from 'react';
 import {
   User,
   FileText,
@@ -43,6 +44,14 @@ const itens: ItemNavegacao[] = [
 ];
 
 export default function SidebarNavegacao() {
+  return (
+    <Suspense fallback={null}>
+      <ConteudoSidebarNavegacao />
+    </Suspense>
+  );
+}
+
+function ConteudoSidebarNavegacao() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const parametrosParcelamento = new URLSearchParams();
