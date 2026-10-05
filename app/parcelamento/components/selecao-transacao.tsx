@@ -58,7 +58,7 @@ export default function SelecaoTransacao({
               key={opcao.id}
               className='overflow-hidden rounded-md border border-line bg-white shadow-sm'
             >
-              <label className='flex min-h-16 cursor-pointer items-center gap-3 px-5 py-4 text-sm font-semibold text-ink'>
+              <label className='flex min-h-16 cursor-pointer items-center gap-3 px-3 py-4 text-sm font-semibold text-ink sm:px-5'>
                 <Checkbox
                   checked={selecionada}
                   onCheckedChange={() => setOpcaoSelecionada(opcao.id)}
@@ -67,7 +67,7 @@ export default function SelecaoTransacao({
                 <span>{descricao}</span>
               </label>
 
-              <div className='overflow-x-auto px-5 pb-5'>
+              <div className='hidden overflow-x-auto px-5 pb-5 md:block'>
                 <table className='w-full min-w-[690px] border-collapse text-right text-xs'>
                   <thead>
                     <tr className='bg-slate-100 text-ink-soft'>
@@ -200,24 +200,113 @@ export default function SelecaoTransacao({
                   </tbody>
                 </table>
               </div>
+
+              <div className='grid gap-3 px-3 pb-4 text-sm md:hidden'>
+                <div className='grid gap-3 border border-line bg-slate-50 p-3'>
+                  <div className='flex flex-wrap items-center justify-between gap-2'>
+                    <span className='font-semibold text-ink'>
+                      Total dívida(s) para parcelamento normal
+                    </span>
+                    <button
+                      type='button'
+                      aria-expanded={detalhesAbertos}
+                      onClick={() =>
+                        setDetalhesVisiveis(
+                          detalhesAbertos ? null : opcao.id,
+                        )
+                      }
+                      className='font-medium text-blue underline underline-offset-2 hover:text-blue-deep'
+                    >
+                      {detalhesAbertos ? 'Ocultar' : 'Visualizar'}
+                    </button>
+                  </div>
+                  <dl className='m-0 grid grid-cols-2 gap-x-3 gap-y-2 text-xs'>
+                    <dt className='text-ink-soft'>Vlr Lançado</dt>
+                    <dd className='m-0 text-right text-ink'>
+                      {formatCurrency(opcao.valores.lancado)}
+                    </dd>
+                    <dt className='text-ink-soft'>Vlr Atualizado</dt>
+                    <dd className='m-0 text-right text-ink'>
+                      {formatCurrency(opcao.valores.atualizado)}
+                    </dd>
+                    <dt className='text-ink-soft'>Jur/Mult/Desc</dt>
+                    <dd className='m-0 text-right text-ink'>
+                      {formatCurrency(opcao.valores.jurosMultaDesconto)}
+                    </dd>
+                    <dt className='text-ink-soft'>Honorário</dt>
+                    <dd className='m-0 text-right text-ink'>
+                      {formatCurrency(opcao.valores.honorario)}
+                    </dd>
+                    <dt className='font-bold text-ink'>Total</dt>
+                    <dd className='m-0 text-right font-bold text-ink'>
+                      {formatCurrency(opcao.valores.total)}
+                    </dd>
+                  </dl>
+                </div>
+
+                {detalhesAbertos && (
+                  <div className='grid gap-2'>
+                    {opcao.parcelas.map((parcela) => (
+                      <dl
+                        key={parcela.id}
+                        className='m-0 grid grid-cols-2 gap-x-3 gap-y-2 border border-line bg-white p-3 text-xs'
+                      >
+                        <dt className='text-ink-soft'>Débito</dt>
+                        <dd className='m-0 text-right font-medium text-ink'>
+                          {parcela.tributo}
+                        </dd>
+                        <dt className='text-ink-soft'>Parcela</dt>
+                        <dd className='m-0 text-right text-ink'>
+                          {parcela.parcela}
+                        </dd>
+                        <dt className='text-ink-soft'>Vlr Lançado</dt>
+                        <dd className='m-0 text-right text-ink'>
+                          {formatCurrency(parcela.valorLancado)}
+                        </dd>
+                        <dt className='text-ink-soft'>Vlr Atualizado</dt>
+                        <dd className='m-0 text-right text-ink'>
+                          {formatCurrency(parcela.valorAtualizado)}
+                        </dd>
+                        <dt className='text-ink-soft'>Jur/Mult/Desc</dt>
+                        <dd className='m-0 text-right text-ink'>
+                          {formatCurrency(parcela.jurosMultaDesconto)}
+                        </dd>
+                        <dt className='text-ink-soft'>Honorário</dt>
+                        <dd className='m-0 text-right text-ink'>
+                          {formatCurrency(parcela.honorario ?? 0)}
+                        </dd>
+                        <dt className='font-bold text-ink'>Total</dt>
+                        <dd className='m-0 text-right font-bold text-ink'>
+                          {formatCurrency(parcela.total)}
+                        </dd>
+                      </dl>
+                    ))}
+                    {opcao.parcelas.length === 0 && (
+                      <p className='m-0 border border-line bg-white p-3 text-center text-xs text-ink-soft'>
+                        Nenhum débito permitido nesta regra.
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
             </section>
           );
         })}
       </div>
 
-      <div className='mt-7 flex items-center gap-3 border-t border-line pt-4'>
+      <div className='mt-7 flex flex-col-reverse items-stretch gap-3 border-t border-line pt-4 sm:flex-row sm:items-center sm:justify-end'>
         <Button
           type='button'
           variant='outline'
           onClick={() => router.back()}
-          className='border-blue text-blue hover:bg-blue/5 hover:text-blue-deep'
+          className='w-full border-blue text-blue hover:bg-blue/5 hover:text-blue-deep sm:w-auto'
         >
           Voltar
         </Button>
         <Button
           type='button'
           onClick={avancar}
-          className='bg-blue px-6 text-white hover:bg-blue-deep'
+          className='w-full bg-blue px-6 text-white hover:bg-blue-deep sm:w-auto'
         >
           Avançar
         </Button>
