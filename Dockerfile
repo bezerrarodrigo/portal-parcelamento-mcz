@@ -30,8 +30,8 @@ COPY . .
 # ENV NEXT_TELEMETRY_DISABLED=1
 # Build-time public env vars for Next.js bundles.
 # Add new ARG/ENV pairs here as needed.
-ARG NEXT_PUBLIC_BASE_URL
-ENV NEXT_PUBLIC_BASE_URL=${NEXT_PUBLIC_BASE_URL}
+ARG NEXT_PUBLIC_SIAT_API_BASE_URL=https://siat-r.campogrande.ms.gov.br/dsf_cgr_gtm/api
+ENV NEXT_PUBLIC_SIAT_API_BASE_URL=${NEXT_PUBLIC_SIAT_API_BASE_URL}
 RUN \
   if [ -f yarn.lock ]; then yarn run build; \
   elif [ -f package-lock.json ]; then npm run build; \
@@ -48,8 +48,8 @@ ENV NODE_ENV=production
 # ENV NEXT_TELEMETRY_DISABLED=1
 # Runtime env vars (server-side and optional public vars).
 # Add new ARG/ENV pairs here as needed.
-ARG NEXT_PUBLIC_BASE_URL
-ENV NEXT_PUBLIC_BASE_URL=${NEXT_PUBLIC_BASE_URL}
+ARG NEXT_PUBLIC_SIAT_API_BASE_URL=https://siat-r.campogrande.ms.gov.br/dsf_cgr_gtm/api
+ENV NEXT_PUBLIC_SIAT_API_BASE_URL=${NEXT_PUBLIC_SIAT_API_BASE_URL}
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 

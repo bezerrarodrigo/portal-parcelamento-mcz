@@ -37,16 +37,15 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 
 ## Docker e Variaveis de Ambiente
 
-O `Dockerfile` foi padronizado para aceitar variaveis futuras com pares `ARG` + `ENV` nos estagios `builder` e `runner`.
+O endpoint do SIAT e configurado pela variavel `NEXT_PUBLIC_SIAT_API_BASE_URL`. Para desenvolvimento local, defina essa variavel no arquivo `.env`.
 
-- `NEXT_PUBLIC_*`: afeta o frontend do Next.js e precisa estar disponivel no build.
-- Variaveis server-side: podem ficar apenas no estagio `runner`.
+No Docker, a variavel precisa estar disponivel no build do Next.js e tambem no estagio `runner`. O Dockerfile usa o endpoint de producao como valor padrao.
 
-### Build da imagem com variavel publica
+### Build da imagem com endpoint personalizado
 
 ```bash
 docker build \
-	--build-arg NEXT_PUBLIC_BASE_URL=https://exemplo.gov.br \
+	--build-arg NEXT_PUBLIC_SIAT_API_BASE_URL=https://exemplo.gov.br/api \
 	-t siat-cgr:latest .
 ```
 
@@ -61,7 +60,5 @@ docker run --rm -p 3000:3000 \
 
 ### Como adicionar novas variaveis
 
-1. Adicione `ARG NOME_DA_VARIAVEL` no estagio necessario.
-2. Adicione `ENV NOME_DA_VARIAVEL=${NOME_DA_VARIAVEL}` no mesmo estagio.
-3. Passe o valor no `docker build` com `--build-arg` quando for necessario no build.
-4. Para variaveis apenas de runtime, forneca no `docker run -e`.
+1. Para variaveis publicas do Next.js (`NEXT_PUBLIC_*`), disponibilize-as no estagio `builder` e passe o valor no `docker build` com `--build-arg`.
+2. Para variaveis necessarias durante a execucao do servidor, disponibilize-as tambem no estagio `runner` ou forneca no `docker run -e`.
