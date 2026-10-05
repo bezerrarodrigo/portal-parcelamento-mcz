@@ -38,7 +38,7 @@ export default async function DashboardPage({
 
       <div className='mx-auto flex w-full max-w-360 flex-1 flex-col gap-6 px-4 py-6 md:px-8 md:py-8'>
         <div className='grid grid-cols-1 gap-6 lg:grid-cols-[2fr_1fr]'>
-          <DadosImovel cadastro={cadastro} />
+          <DadosImovel cadastro={cadastro} idContrato={id} />
           <MapaCard />
         </div>
 

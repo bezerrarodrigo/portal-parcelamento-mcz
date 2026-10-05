@@ -1,15 +1,54 @@
 'use client';
 
 import { useState } from 'react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import { obterCertidaoFinanceira } from '@/lib/api/certidoes';
 import type { Cadastro } from '@/lib/mock-cadastros';
 
 interface DadosImovelProps {
   cadastro: Cadastro;
+  idContrato?: string;
 }
 
-export default function DadosImovel({ cadastro }: DadosImovelProps) {
+export default function DadosImovel({
+  cadastro,
+  idContrato,
+}: DadosImovelProps) {
   const [visivel, setVisivel] = useState(true);
+  const [carregandoCertidao, setCarregandoCertidao] = useState(false);
+
+  async function handleImprimirCertidao() {
+    if (!idContrato) {
+      toast.error('Não foi possível identificar o contrato deste cadastro.');
+      return;
+    }
+
+    const janela = window.open('', '_blank');
+    if (!janela) {
+      toast.error('Permita a abertura de pop-ups para visualizar a certidão.');
+      return;
+    }
+    janela.opener = null;
+    janela.document.title = 'Preparando certidão...';
+    setCarregandoCertidao(true);
+
+    try {
+      const arquivo = await obterCertidaoFinanceira(idContrato);
+      const url = URL.createObjectURL(arquivo);
+      janela.location.href = url;
+      window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
+    } catch (error) {
+      janela.close();
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : 'Não foi possível gerar a certidão. Tente novamente.',
+      );
+    } finally {
+      setCarregandoCertidao(false);
+    }
+  }
 
   return (
     <section className='border border-line bg-white'>
@@ -43,9 +82,11 @@ export default function DadosImovel({ cadastro }: DadosImovelProps) {
               </Button>
               <Button
                 type='button'
+                onClick={handleImprimirCertidao}
+                disabled={!idContrato || carregandoCertidao}
                 className='w-full bg-gray-500 hover:bg-gray-600 sm:w-auto'
               >
-                Imprimir Certidão
+                {carregandoCertidao ? 'Gerando certidão...' : 'Imprimir Certidão'}
               </Button>
             </div>
 
