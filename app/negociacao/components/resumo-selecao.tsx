@@ -97,13 +97,15 @@ export default function ResumoSelecao({
                 <td>{formatCurrency(somar(grupo, 'total'))}</td>
               </tr>
             ))}
-            <tr>
-              <td>
-                <strong>Dívida(s) que não podem ser parceladas</strong>
-              </td>
-              <td colSpan={3}>{dialogDividasNaoParcelaveis}</td>
-              <td>{formatCurrency(totalNaoParcelavel)}</td>
-            </tr>
+            {dividasNaoParcelaveis.length > 0 && (
+              <tr>
+                <td>
+                  <strong>Dívida(s) que não podem ser parceladas</strong>
+                </td>
+                <td colSpan={3}>{dialogDividasNaoParcelaveis}</td>
+                <td>{formatCurrency(totalNaoParcelavel)}</td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
@@ -141,15 +143,17 @@ export default function ResumoSelecao({
           </div>
         ))}
 
-        <div className='grid gap-2 border border-line bg-white p-3 text-[0.86rem]'>
-          <strong>Dívida(s) que não podem ser parceladas</strong>
-          <div className='flex items-center justify-between gap-3'>
-            {dialogDividasNaoParcelaveis}
-            <span className='font-extrabold'>
-              {formatCurrency(totalNaoParcelavel)}
-            </span>
+        {dividasNaoParcelaveis.length > 0 && (
+          <div className='grid gap-2 border border-line bg-white p-3 text-[0.86rem]'>
+            <strong>Dívida(s) que não podem ser parceladas</strong>
+            <div className='flex items-center justify-between gap-3'>
+              {dialogDividasNaoParcelaveis}
+              <span className='font-extrabold'>
+                {formatCurrency(totalNaoParcelavel)}
+              </span>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </>
   );

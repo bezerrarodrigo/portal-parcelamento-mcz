@@ -4,58 +4,26 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-
-interface OpcaoTransacao {
-  id: string;
-  descricao: string;
-  mode: 'vista' | 'parcelado';
-  valores: {
-    lancado: string;
-    atualizado: string;
-    jurosMultaDesconto: string;
-    honorario: string;
-    total: string;
-  };
-}
-
-const opcoes: OpcaoTransacao[] = [
-  {
-    id: 'adesao-vista',
-    descricao: '1 - TRANSACAO ADESAO 2026 - A VISTA - IMO',
-    mode: 'vista',
-    valores: {
-      lancado: '33.160,99',
-      atualizado: '55.797,92',
-      jurosMultaDesconto: '74.268,19',
-      honorario: '1.513,11',
-      total: '130.066,11',
-    },
-  },
-  {
-    id: 'adesao-parcelado',
-    descricao: '2 - TRANSACAO ADESAO 2026 - PARCELADO - IMO',
-    mode: 'parcelado',
-    valores: {
-      lancado: '33.160,99',
-      atualizado: '55.797,92',
-      jurosMultaDesconto: '74.268,19',
-      honorario: '1.513,11',
-      total: '130.066,11',
-    },
-  },
-];
+import { formatCurrency } from '@/lib/formatters';
+import type { OpcaoParcelamento } from '@/lib/api/parcelamentos';
 
 interface SelecaoTransacaoProps {
   cadastro: string;
+  idCadastro: string;
   inscricao?: string;
+  opcoes: OpcaoParcelamento[];
 }
 
 export default function SelecaoTransacao({
   cadastro,
+  idCadastro,
   inscricao,
+  opcoes,
 }: SelecaoTransacaoProps) {
   const router = useRouter();
-  const [opcaoSelecionada, setOpcaoSelecionada] = useState('adesao-parcelado');
+  const [opcaoSelecionada, setOpcaoSelecionada] = useState(
+    () => opcoes.find((opcao) => opcao.mode === 'parcelado')?.id ?? opcoes[0].id,
+  );
   const [detalhesVisiveis, setDetalhesVisiveis] = useState<string | null>(null);
 
   function avancar() {
@@ -64,8 +32,12 @@ export default function SelecaoTransacao({
 
     const params = new URLSearchParams({
       cadastro,
-      mode: opcao.mode,
+      id: idCadastro,
+      regraId: opcao.id,
     });
+    if (opcao.mode) {
+      params.set('mode', opcao.mode);
+    }
     if (inscricao) {
       params.set('inscricao', inscricao);
     }
@@ -76,9 +48,10 @@ export default function SelecaoTransacao({
   return (
     <div className='mt-8'>
       <div role='group' aria-label='Opções de transação' className='grid gap-5'>
-        {opcoes.map((opcao) => {
+        {opcoes.map((opcao, index) => {
           const selecionada = opcaoSelecionada === opcao.id;
           const detalhesAbertos = detalhesVisiveis === opcao.id;
+          const descricao = `${index + 1} - ${opcao.nome}`;
 
           return (
             <section
@@ -89,9 +62,9 @@ export default function SelecaoTransacao({
                 <Checkbox
                   checked={selecionada}
                   onCheckedChange={() => setOpcaoSelecionada(opcao.id)}
-                  aria-label={`Selecionar ${opcao.descricao}`}
+                  aria-label={`Selecionar ${descricao}`}
                 />
-                <span>{opcao.descricao}</span>
+                <span>{descricao}</span>
               </label>
 
               <div className='overflow-x-auto px-5 pb-5'>
@@ -134,19 +107,19 @@ export default function SelecaoTransacao({
                         </button>
                       </td>
                       <td className='border border-line px-3 py-2'>
-                        {opcao.valores.lancado}
+                        {formatCurrency(opcao.valores.lancado)}
                       </td>
                       <td className='border border-line px-3 py-2'>
-                        {opcao.valores.atualizado}
+                        {formatCurrency(opcao.valores.atualizado)}
                       </td>
                       <td className='border border-line px-3 py-2'>
-                        {opcao.valores.jurosMultaDesconto}
+                        {formatCurrency(opcao.valores.jurosMultaDesconto)}
                       </td>
                       <td className='border border-line px-3 py-2'>
-                        {opcao.valores.honorario}
+                        {formatCurrency(opcao.valores.honorario)}
                       </td>
                       <td className='border border-line px-3 py-2'>
-                        {opcao.valores.total}
+                        {formatCurrency(opcao.valores.total)}
                       </td>
                     </tr>
                     {detalhesAbertos && (
@@ -155,8 +128,72 @@ export default function SelecaoTransacao({
                           colSpan={6}
                           className='border border-line bg-white px-3 py-3 text-left text-ink-soft'
                         >
-                          Valores demonstrativos da transação. O detalhamento
-                          estará disponível após a integração com a API.
+                          <div className='overflow-x-auto'>
+                            <table className='w-full min-w-[760px] border-collapse text-right'>
+                              <thead className='bg-slate-100 text-ink-soft'>
+                                <tr>
+                                  <th className='border border-line px-2 py-2 text-left font-semibold'>
+                                    Débito
+                                  </th>
+                                  <th className='border border-line px-2 py-2 font-semibold'>
+                                    Parcela
+                                  </th>
+                                  <th className='border border-line px-2 py-2 font-semibold'>
+                                    Vlr Lançado
+                                  </th>
+                                  <th className='border border-line px-2 py-2 font-semibold'>
+                                    Vlr Atualizado
+                                  </th>
+                                  <th className='border border-line px-2 py-2 font-semibold'>
+                                    Jur/Mult/Desc
+                                  </th>
+                                  <th className='border border-line px-2 py-2 font-semibold'>
+                                    Honorário
+                                  </th>
+                                  <th className='border border-line px-2 py-2 font-semibold'>
+                                    Total
+                                  </th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {opcao.parcelas.map((parcela) => (
+                                  <tr key={parcela.id} className='text-ink'>
+                                    <td className='border border-line px-2 py-2 text-left'>
+                                      {parcela.tributo}
+                                    </td>
+                                    <td className='border border-line px-2 py-2'>
+                                      {parcela.parcela}
+                                    </td>
+                                    <td className='border border-line px-2 py-2'>
+                                      {formatCurrency(parcela.valorLancado)}
+                                    </td>
+                                    <td className='border border-line px-2 py-2'>
+                                      {formatCurrency(parcela.valorAtualizado)}
+                                    </td>
+                                    <td className='border border-line px-2 py-2'>
+                                      {formatCurrency(parcela.jurosMultaDesconto)}
+                                    </td>
+                                    <td className='border border-line px-2 py-2'>
+                                      {formatCurrency(parcela.honorario ?? 0)}
+                                    </td>
+                                    <td className='border border-line px-2 py-2'>
+                                      {formatCurrency(parcela.total)}
+                                    </td>
+                                  </tr>
+                                ))}
+                                {opcao.parcelas.length === 0 && (
+                                  <tr>
+                                    <td
+                                      colSpan={7}
+                                      className='border border-line px-2 py-3 text-center'
+                                    >
+                                      Nenhum débito permitido nesta regra.
+                                    </td>
+                                  </tr>
+                                )}
+                              </tbody>
+                            </table>
+                          </div>
                         </td>
                       </tr>
                     )}

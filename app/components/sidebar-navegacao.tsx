@@ -9,7 +9,7 @@ import {
   LogOut,
 } from 'lucide-react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { cn } from '@/lib/utils';
 
 interface ItemNavegacao {
@@ -44,12 +44,29 @@ const itens: ItemNavegacao[] = [
 
 export default function SidebarNavegacao() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const parametrosParcelamento = new URLSearchParams();
+  const idCadastro = searchParams.get('id');
+  const inscricao = searchParams.get('inscricao');
+
+  if (idCadastro) {
+    parametrosParcelamento.set('id', idCadastro);
+  }
+  if (inscricao) {
+    parametrosParcelamento.set('inscricao', inscricao);
+  }
+
+  const hrefParcelamento = parametrosParcelamento.size
+    ? `/parcelamento?${parametrosParcelamento.toString()}`
+    : '/parcelamento';
 
   return (
     <aside className='flex shrink-0 flex-wrap gap-4 border-b border-line bg-white px-4 py-3 md:w-32 md:flex-col md:flex-nowrap md:items-center md:gap-6 md:border-r md:border-b-0 md:py-8'>
       {itens.map((item) => {
         const Icon = item.icon;
         const ativo = item.habilitado && pathname === item.href;
+        const href =
+          item.href === '/parcelamento' ? hrefParcelamento : item.href;
         const conteudo = (
           <>
             <span
@@ -79,7 +96,7 @@ export default function SidebarNavegacao() {
         return (
           <Link
             key={item.label}
-            href={item.href}
+            href={href}
             aria-current={ativo ? 'page' : undefined}
             className={cn(
               'flex items-center gap-2 text-center text-ink-soft no-underline hover:text-orange md:flex-col md:gap-2',

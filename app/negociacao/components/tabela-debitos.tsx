@@ -88,7 +88,9 @@ export default function TabelaDebitos({
                 <TableCell>{debito.exercicio}</TableCell>
                 <TableCell>{debito.parcela}</TableCell>
                 <TableCell>{debito.codLacto}</TableCell>
-                <TableCell>{formatDate(debito.vencimento)}</TableCell>
+                <TableCell>
+                  {debito.vencimento ? formatDate(debito.vencimento) : '-'}
+                </TableCell>
                 <TableCell>{formatCurrency(debito.valorLancado)}</TableCell>
                 <TableCell>{formatCurrency(debito.valorAtualizado)}</TableCell>
                 <TableCell>

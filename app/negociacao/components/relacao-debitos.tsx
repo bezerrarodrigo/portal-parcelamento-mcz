@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import type { Debito } from '@/lib/mock-debitos';
+import type { Debito, DividaNaoParcelavel } from '@/lib/mock-debitos';
 import { getDividasNaoParcelaveis } from '@/lib/mock-debitos';
 import FiltroDebitos, { TODOS, type DateRange } from './filtro-debitos';
 import TabelaDebitos from './tabela-debitos';
@@ -13,9 +13,13 @@ import FormularioConfirmacao from './formulario-confirmacao';
 
 interface RelacaoDebitosProps {
   debitos: Debito[];
+  dividasNaoParcelaveis?: DividaNaoParcelavel[];
 }
 
-export default function RelacaoDebitos({ debitos }: RelacaoDebitosProps) {
+export default function RelacaoDebitos({
+  debitos,
+  dividasNaoParcelaveis: dividasNaoParcelaveisRecebidas,
+}: RelacaoDebitosProps) {
   const [tributosSelecionados, setTributosSelecionados] = useState([TODOS]);
   const [exerciciosSelecionados, setExerciciosSelecionados] = useState([TODOS]);
   const [vencimentoSelecionado, setVencimentoSelecionado] = useState<DateRange>(
@@ -68,7 +72,10 @@ export default function RelacaoDebitos({ debitos }: RelacaoDebitosProps) {
     debitosFiltrados.length > 0 &&
     debitosFiltrados.every((debito) => selecionados.has(debito.id));
 
-  const dividasNaoParcelaveis = useMemo(() => getDividasNaoParcelaveis(), []);
+  const dividasNaoParcelaveis = useMemo(
+    () => dividasNaoParcelaveisRecebidas ?? getDividasNaoParcelaveis(),
+    [dividasNaoParcelaveisRecebidas],
+  );
 
   function handleToggle(id: string) {
     const proximo = new Set(selecionados);

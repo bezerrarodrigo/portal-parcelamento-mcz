@@ -1,3 +1,5 @@
+import { obterOpcoesParcelamento } from '@/lib/api/parcelamentos';
+import type { Debito } from '@/lib/mock-debitos';
 import { getDebitosPorInscricao } from '@/lib/mock-debitos';
 import SidebarNavegacao from '../components/sidebar-navegacao';
 import RelacaoDebitos from './components/relacao-debitos';
@@ -7,14 +9,45 @@ interface NegociacaoPageProps {
     cadastro?: string;
     inscricao?: string;
     mode?: string;
+    id?: string;
+    regraId?: string;
   }>;
 }
 
 export default async function NegociacaoPage({
   searchParams,
 }: NegociacaoPageProps) {
-  const { cadastro, inscricao, mode } = await searchParams;
-  const debitos = getDebitosPorInscricao(inscricao ?? '');
+  const { cadastro, inscricao, mode, id, regraId } = await searchParams;
+  let debitos: Debito[] = [];
+  let nomeRegra: string | null = null;
+  let erro: string | null = null;
+  const fluxoApi = Boolean(id || regraId);
+
+  if (fluxoApi) {
+    if (!id || !regraId) {
+      erro = 'Não foi possível identificar o cadastro ou a regra selecionada.';
+    } else {
+      try {
+        const opcoes = await obterOpcoesParcelamento(id);
+        const opcao = opcoes.find((item) => item.id === regraId);
+
+        if (!opcao) {
+          throw new Error('A regra selecionada não está mais disponível.');
+        }
+
+        debitos = opcao.parcelas;
+        nomeRegra = opcao.nome;
+      } catch (error) {
+        erro =
+          error instanceof Error
+            ? error.message
+            : 'Não foi possível carregar os débitos da regra selecionada.';
+      }
+    }
+  } else {
+    debitos = getDebitosPorInscricao(inscricao ?? '');
+  }
+
   const modalidadeSelecionada =
     mode === 'vista' ? 'À vista' : mode === 'parcelado' ? 'Parcelado' : null;
 
@@ -29,13 +62,27 @@ export default async function NegociacaoPage({
         <h1 className='m-0 text-[clamp(1.6rem,3vw,2.1rem)] tracking-[-0.02em] text-ink'>
           Relação de débitos
         </h1>
-        <p className='mt-2 mb-8 text-ink-soft'>
-          Cadastro: {cadastro === 'imovel' ? 'Imóvel' : 'CPF/CNPJ'} · Inscrição
-          municipal: {inscricao || 'não informada'}
-          {modalidadeSelecionada && ` · Opção selecionada: ${modalidadeSelecionada}`}
-        </p>
+        {erro ? (
+          <p role='alert' className='mt-4 border border-line bg-white p-5 text-ink'>
+            {erro}
+          </p>
+        ) : (
+          <>
+            <p className='mt-2 mb-8 text-ink-soft'>
+              Cadastro: {cadastro === 'imovel' ? 'Imóvel' : 'CPF/CNPJ'} ·
+              Inscrição municipal: {inscricao || 'não informada'}
+              {nomeRegra && ` · Regra: ${nomeRegra}`}
+              {!nomeRegra &&
+                modalidadeSelecionada &&
+                ` · Opção selecionada: ${modalidadeSelecionada}`}
+            </p>
 
-        <RelacaoDebitos debitos={debitos} />
+            <RelacaoDebitos
+              debitos={debitos}
+              dividasNaoParcelaveis={fluxoApi ? [] : undefined}
+            />
+          </>
+        )}
       </div>
     </main>
   );

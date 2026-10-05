@@ -73,7 +73,7 @@ export default function CartoesDebitos({
             </div>
             <div>
               <dt>Vencimento</dt>
-              <dd>{formatDate(debito.vencimento)}</dd>
+              <dd>{debito.vencimento ? formatDate(debito.vencimento) : '-'}</dd>
             </div>
             <div>
               <dt>Vlr Lançado</dt>

@@ -11,6 +11,7 @@ export interface Debito {
   valorLancado: number;
   valorAtualizado: number;
   jurosMultaDesconto: number;
+  honorario?: number;
   total: number;
   atrasoDias: number | null;
   situacao: string;
