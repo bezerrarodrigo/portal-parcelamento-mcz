@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { apiClient } from '@/lib/http-client';
 import type { Debito } from '@/lib/mock-debitos';
+import type { DadosGuia } from '@/lib/api/guia-contrato';
 
 interface ParcelaPermitidaApi {
   id: number;
@@ -28,6 +29,8 @@ interface RegraParcelamentoApi {
   id: number;
   nome: string;
   quantidadeParcelas?: number | null;
+  valorMinimoParcela?: number | null;
+  percentualMinimoEntrada?: number | null;
   parcelasPermitidas?: ParcelaPermitidaApi[] | null;
 }
 
@@ -52,6 +55,7 @@ export interface OpcaoParcelamento {
     total: number;
   };
   parcelas: Debito[];
+  guia: DadosGuia;
 }
 
 const IDS_REGRAS_PARCELAMENTO = '626,627,628,629,630,631';
@@ -171,6 +175,19 @@ function mapearRegra(regra: RegraParcelamentoApi): OpcaoParcelamento {
       total: somarValores(parcelas, (parcela) => parcela.valorTotal),
     },
     parcelas: parcelas.map((parcela) => mapearParcela(parcela, regra.id)),
+    guia: {
+      aVista: identificarMode(regra.nome) === 'vista',
+      regra: {
+        id: regra.id,
+        nome: regra.nome,
+        quantidadeParcelas: regra.quantidadeParcelas ?? null,
+        valorMinimoParcela: regra.valorMinimoParcela ?? null,
+        percentualMinimoEntrada: regra.percentualMinimoEntrada ?? null,
+      },
+      parcelasPorDebito: Object.fromEntries(
+        parcelas.map((parcela) => [`${regra.id}-${parcela.id}`, parcela]),
+      ),
+    },
   };
 }
 

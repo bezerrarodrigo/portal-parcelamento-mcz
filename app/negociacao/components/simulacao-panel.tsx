@@ -1,32 +1,58 @@
 'use client';
 
 import { useState } from 'react';
+import { toast } from 'sonner';
+import {
+  QUANTIDADE_MAXIMA_PARCELAS,
+  QUANTIDADE_MINIMA_PARCELAS,
+  chaveSimulacao,
+  montarRequisicaoGuia,
+  type DadosGuia,
+} from '@/lib/api/guia-contrato';
+import {
+  simularParcelamentoApi,
+  type ParcelamentoSimulado,
+} from '@/lib/api/parcelamento-simulado';
 import type { Debito } from '@/lib/mock-debitos';
 import { simularParcelamento } from '@/lib/simulacao-parcelamento';
-import { formatCurrency, formatPercent } from '@/lib/formatters';
+import { formatCurrency, formatDate, formatPercent } from '@/lib/formatters';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
-const QUANTIDADE_MINIMA_PARCELAS = 1;
-const QUANTIDADE_MAXIMA_PARCELAS = 12;
 const VALOR_MINIMO_PARCELA = 0;
 
 interface SimulacaoPanelProps {
   selecionados: Debito[];
+  guia?: DadosGuia;
+  valorEntrada: number;
+  onValorEntradaChange: (valor: number) => void;
+  onSimulada: (chave: string) => void;
   quantidadeParcelas: number;
   onQuantidadeParcelasChange: (valor: number) => void;
   resultadoVisivel: boolean;
   onResultadoVisivelChange: (valor: boolean) => void;
 }
 
+function formatarDataApi(valor: string): string {
+  return /^\d{4}-\d{2}-\d{2}$/.test(valor) ? formatDate(valor) : valor;
+}
+
 export default function SimulacaoPanel({
   selecionados,
+  guia,
+  valorEntrada,
+  onValorEntradaChange,
+  onSimulada,
   quantidadeParcelas,
   onQuantidadeParcelasChange,
   resultadoVisivel,
   onResultadoVisivelChange,
 }: SimulacaoPanelProps) {
-  const [valorEntrada, setValorEntrada] = useState(0);
+  const [simulando, setSimulando] = useState(false);
+  const [simulacao, setSimulacao] = useState<{
+    chave: string;
+    dados: ParcelamentoSimulado;
+  } | null>(null);
 
   const valorLancadoSelecionado = selecionados.reduce(
     (total, debito) => total + debito.valorLancado,
@@ -44,8 +70,44 @@ export default function SimulacaoPanel({
     valorEntrada,
   });
 
-  function handleSimular() {
-    onResultadoVisivelChange(true);
+  const chaveAtual = chaveSimulacao({
+    selecionados,
+    quantidadeParcelas,
+    valorEntrada,
+  });
+  const simulacaoAtual =
+    simulacao?.chave === chaveAtual ? simulacao.dados : null;
+
+  async function handleSimular() {
+    if (!guia) {
+      onResultadoVisivelChange(true);
+      return;
+    }
+
+    const chave = chaveAtual;
+    setSimulando(true);
+
+    try {
+      const dados = await simularParcelamentoApi(
+        montarRequisicaoGuia({
+          guia,
+          selecionados,
+          quantidadeParcelas,
+          valorEntrada,
+        }),
+      );
+      setSimulacao({ chave, dados });
+      onSimulada(chave);
+      onResultadoVisivelChange(true);
+    } catch (error) {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : 'Não foi possível simular o parcelamento. Tente novamente.',
+      );
+    } finally {
+      setSimulando(false);
+    }
   }
 
   return (
@@ -85,7 +147,7 @@ export default function SimulacaoPanel({
             value={valorEntrada}
             onChange={(event) => {
               onResultadoVisivelChange(false);
-              setValorEntrada(Number(event.target.value));
+              onValorEntradaChange(Number(event.target.value));
             }}
           />
         </div>
@@ -93,9 +155,9 @@ export default function SimulacaoPanel({
           <Button
             type='button'
             onClick={handleSimular}
-            disabled={selecionados.length === 0}
+            disabled={selecionados.length === 0 || simulando}
           >
-            Simular
+            {simulando ? 'Simulando...' : 'Simular'}
           </Button>
           <Button
             type='button'
@@ -113,10 +175,81 @@ export default function SimulacaoPanel({
           Quantidade de parcelas: {QUANTIDADE_MINIMA_PARCELAS} a{' '}
           {QUANTIDADE_MAXIMA_PARCELAS}.
         </p>
-        <p>Valor mínimo da parcela: {formatCurrency(VALOR_MINIMO_PARCELA)}.</p>
+        <p>
+          Valor mínimo da parcela:{' '}
+          {formatCurrency(
+            guia?.regra.valorMinimoParcela ?? VALOR_MINIMO_PARCELA,
+          )}
+          .
+        </p>
       </div>
 
-      {resultadoVisivel && (
+      {guia && resultadoVisivel && simulacaoAtual && (
+        <div className='border-t border-line pt-5 [&_h3]:m-0 [&_h3]:mb-2 [&_h3]:text-[1.05rem] [&_h3]:text-ink'>
+          <h3>Parcelamento</h3>
+          <div className='overflow-x-auto'>
+            <table className='w-full border-collapse bg-white [&_td]:border-b [&_td]:border-line [&_td]:p-3 [&_td]:text-left [&_td]:text-[0.86rem] [&_th]:border-b [&_th]:border-line [&_th]:p-3 [&_th]:text-left [&_th]:text-[0.86rem]'>
+              <thead>
+                <tr>
+                  <th>Condições</th>
+                  <th>Vlr Lançado</th>
+                  <th>Atualização monetária</th>
+                  <th>Juros</th>
+                  <th>Multa</th>
+                  <th>Desconto</th>
+                  <th>Honorário</th>
+                  <th>Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                {simulacaoAtual.parcelasSimuladas.map((parcela) => (
+                  <tr key={parcela.descricao}>
+                    <td>{parcela.descricao}</td>
+                    <td>{formatCurrency(parcela.valorLancado)}</td>
+                    <td>{formatCurrency(parcela.valorAtualizacaoMonetaria)}</td>
+                    <td>{formatCurrency(parcela.jurosMora)}</td>
+                    <td>{formatCurrency(parcela.multaMora)}</td>
+                    <td>{formatCurrency(parcela.desconto)}</td>
+                    <td>{formatCurrency(parcela.honorario)}</td>
+                    <td>{formatCurrency(parcela.valorTotal)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div className='mt-4 flex flex-wrap gap-x-6 gap-y-1 border-t border-line pt-4 text-ink'>
+            <span>
+              <strong>1ª Parcela:</strong>{' '}
+              {formatCurrency(simulacaoAtual.valorPrimeiraParcela)}
+            </span>
+            {simulacaoAtual.quantidadeParcelas > 1 && (
+              <span>
+                <strong>2ª Parcela:</strong>{' '}
+                {formatCurrency(simulacaoAtual.valorSegundaParcela)}
+              </span>
+            )}
+            {simulacaoAtual.quantidadeParcelas > 2 && (
+              <span>
+                <strong>Demais parcelas:</strong>{' '}
+                {formatCurrency(simulacaoAtual.valorDemaisParcelas)}
+              </span>
+            )}
+            <span>
+              <strong>1º vencimento:</strong>{' '}
+              {formatarDataApi(simulacaoAtual.dataPrimeiroVencimento)}
+            </span>
+            {simulacaoAtual.quantidadeParcelas > 1 && (
+              <span>
+                <strong>Último vencimento:</strong>{' '}
+                {formatarDataApi(simulacaoAtual.dataUltimoVencimento)}
+              </span>
+            )}
+          </div>
+        </div>
+      )}
+
+      {!guia && resultadoVisivel && (
         <div className='border-t border-line pt-5 [&_h3]:m-0 [&_h3]:mb-2 [&_h3]:text-[1.05rem] [&_h3]:text-ink'>
           <h3>Parcelamento</h3>
           <table className='w-full border-collapse bg-white [&_td]:border-b [&_td]:border-line [&_td]:p-3 [&_td]:text-left [&_td]:text-[0.86rem] [&_th]:border-b [&_th]:border-line [&_th]:p-3 [&_th]:text-left [&_th]:text-[0.86rem]'>

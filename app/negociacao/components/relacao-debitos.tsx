@@ -3,6 +3,11 @@
 import { useMemo, useState } from 'react';
 import type { Debito, DividaNaoParcelavel } from '@/lib/mock-debitos';
 import { getDividasNaoParcelaveis } from '@/lib/mock-debitos';
+import {
+  chaveSimulacao,
+  montarRequisicaoGuia,
+  type DadosGuia,
+} from '@/lib/api/guia-contrato';
 import FiltroDebitos, { TODOS, type DateRange } from './filtro-debitos';
 import TabelaDebitos from './tabela-debitos';
 import CartoesDebitos from './cartoes-debitos';
@@ -14,11 +19,13 @@ import FormularioConfirmacao from './formulario-confirmacao';
 interface RelacaoDebitosProps {
   debitos: Debito[];
   dividasNaoParcelaveis?: DividaNaoParcelavel[];
+  guia?: DadosGuia;
 }
 
 export default function RelacaoDebitos({
   debitos,
   dividasNaoParcelaveis: dividasNaoParcelaveisRecebidas,
+  guia,
 }: RelacaoDebitosProps) {
   const [tributosSelecionados, setTributosSelecionados] = useState([TODOS]);
   const [exerciciosSelecionados, setExerciciosSelecionados] = useState([TODOS]);
@@ -35,6 +42,8 @@ export default function RelacaoDebitos({
   );
   const [quantidadeParcelas, setQuantidadeParcelas] = useState(1);
   const [resultadoVisivel, setResultadoVisivel] = useState(false);
+  const [valorEntrada, setValorEntrada] = useState(0);
+  const [chaveSimulada, setChaveSimulada] = useState<string | null>(null);
 
   const tributos = useMemo(
     () => Array.from(new Set(debitos.map((debito) => debito.tributo))),
@@ -76,6 +85,14 @@ export default function RelacaoDebitos({
     () => dividasNaoParcelaveisRecebidas ?? getDividasNaoParcelaveis(),
     [dividasNaoParcelaveisRecebidas],
   );
+
+  const simulacaoValida =
+    chaveSimulada ===
+    chaveSimulacao({
+      selecionados: debitosSelecionados,
+      quantidadeParcelas,
+      valorEntrada,
+    });
 
   function handleToggle(id: string) {
     const proximo = new Set(selecionados);
@@ -166,13 +183,35 @@ export default function RelacaoDebitos({
 
       <SimulacaoPanel
         selecionados={debitosSelecionados}
+        guia={guia}
+        valorEntrada={valorEntrada}
+        onValorEntradaChange={setValorEntrada}
+        onSimulada={setChaveSimulada}
         quantidadeParcelas={quantidadeParcelas}
         onQuantidadeParcelasChange={setQuantidadeParcelas}
         resultadoVisivel={resultadoVisivel}
         onResultadoVisivelChange={setResultadoVisivel}
       />
 
-      <FormularioConfirmacao podeEnviar={debitosSelecionados.length > 0} />
+      <FormularioConfirmacao
+        podeEnviar={
+          debitosSelecionados.length > 0 && (!guia || simulacaoValida)
+        }
+        aguardandoSimulacao={
+          Boolean(guia) && debitosSelecionados.length > 0 && !simulacaoValida
+        }
+        montarRequisicao={
+          guia
+            ? () =>
+                montarRequisicaoGuia({
+                  guia,
+                  selecionados: debitosSelecionados,
+                  quantidadeParcelas,
+                  valorEntrada,
+                })
+            : undefined
+        }
+      />
     </div>
   );
 }

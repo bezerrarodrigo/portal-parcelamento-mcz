@@ -1,4 +1,5 @@
 import { obterOpcoesParcelamento } from '@/lib/api/parcelamentos';
+import type { DadosGuia } from '@/lib/api/guia-contrato';
 import type { Debito } from '@/lib/mock-debitos';
 import { getDebitosPorInscricao } from '@/lib/mock-debitos';
 import SidebarNavegacao from '../components/sidebar-navegacao';
@@ -20,6 +21,7 @@ export default async function NegociacaoPage({
   const { cadastro, inscricao, mode, id, regraId } = await searchParams;
   let debitos: Debito[] = [];
   let nomeRegra: string | null = null;
+  let guia: DadosGuia | undefined;
   let erro: string | null = null;
   const fluxoApi = Boolean(id || regraId);
 
@@ -37,6 +39,7 @@ export default async function NegociacaoPage({
 
         debitos = opcao.parcelas;
         nomeRegra = opcao.nome;
+        guia = opcao.guia;
       } catch (error) {
         erro =
           error instanceof Error
@@ -79,6 +82,7 @@ export default async function NegociacaoPage({
 
             <RelacaoDebitos
               debitos={debitos}
+              guia={guia}
               dividasNaoParcelaveis={fluxoApi ? [] : undefined}
             />
           </>

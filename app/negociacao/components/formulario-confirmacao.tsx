@@ -1,6 +1,11 @@
 'use client';
 
 import { useState } from 'react';
+import { toast } from 'sonner';
+import {
+  gerarGuiaContrato,
+  type GuiaContratoRequest,
+} from '@/lib/api/guia-contrato';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
@@ -15,6 +20,9 @@ import { CheckCircle2 } from 'lucide-react';
 
 interface FormularioConfirmacaoProps {
   podeEnviar: boolean;
+  aguardandoSimulacao?: boolean;
+  // Quando informado, o envio emite a guia e o contrato pela API do SIAT.
+  montarRequisicao?: () => GuiaContratoRequest;
 }
 
 interface Erros {
@@ -27,13 +35,59 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function FormularioConfirmacao({
   podeEnviar,
+  aguardandoSimulacao = false,
+  montarRequisicao,
 }: FormularioConfirmacaoProps) {
   const [email, setEmail] = useState('');
   const [telefone, setTelefone] = useState('');
   const [aceitouTermos, setAceitouTermos] = useState(false);
   const [erros, setErros] = useState<Erros>({});
   const [enviado, setEnviado] = useState(false);
+  const [emitindo, setEmitindo] = useState(false);
+  const [linkPagamento, setLinkPagamento] = useState<string | null>(null);
   const [termosAbertos, setTermosAbertos] = useState(false);
+
+  async function emitirGuia(montar: () => GuiaContratoRequest) {
+    let requisicao: GuiaContratoRequest;
+    try {
+      requisicao = montar();
+    } catch (error) {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : 'Não foi possível montar os dados da guia.',
+      );
+      return;
+    }
+
+    // Abre a janela no clique para não ser bloqueada como pop-up após o await.
+    const janela = window.open('', '_blank');
+    if (!janela) {
+      toast.error('Permita a abertura de pop-ups para visualizar a guia.');
+      return;
+    }
+    janela.opener = null;
+    janela.document.title = 'Preparando guia...';
+    setEmitindo(true);
+
+    try {
+      const guia = await gerarGuiaContrato(requisicao);
+      const url = URL.createObjectURL(guia.arquivo);
+      janela.location.href = url;
+      window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
+      setLinkPagamento(guia.linkPagamento);
+      setEnviado(true);
+    } catch (error) {
+      janela.close();
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : 'Não foi possível emitir a guia e o contrato. Tente novamente.',
+      );
+    } finally {
+      setEmitindo(false);
+    }
+  }
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -50,10 +104,17 @@ export default function FormularioConfirmacao({
     }
 
     setErros(novosErros);
-    if (Object.keys(novosErros).length === 0) {
-      // Envio mockado: a integração com a API de parcelamento será feita futuramente.
-      setEnviado(true);
+    if (Object.keys(novosErros).length > 0) {
+      return;
     }
+
+    if (montarRequisicao) {
+      void emitirGuia(montarRequisicao);
+      return;
+    }
+
+    // Envio mockado: sem a integração com a API de parcelamento.
+    setEnviado(true);
   }
 
   if (enviado) {
@@ -61,11 +122,41 @@ export default function FormularioConfirmacao({
       <div className='flex items-start gap-4 border border-line bg-white p-6 text-blue-deep'>
         <CheckCircle2 size={28} />
         <div>
-          <strong>Solicitação registrada com sucesso.</strong>
-          <p className='mt-1.5 text-[0.86rem] text-ink-soft'>
-            Este é um protótipo — nenhuma solicitação real foi enviada. Em
-            breve, esta etapa será integrada à API de parcelamento.
-          </p>
+          {montarRequisicao ? (
+            <>
+              <strong>Guia e contrato emitidos com sucesso.</strong>
+              <p className='mt-1.5 text-[0.86rem] text-ink-soft'>
+                O PDF foi aberto em uma nova aba.
+              </p>
+              {linkPagamento && (
+                <p className='mt-1.5 text-[0.86rem]'>
+                  <a
+                    href={linkPagamento}
+                    target='_blank'
+                    rel='noopener noreferrer'
+                    className='font-semibold text-blue underline hover:text-orange'
+                  >
+                    Pagar com cartão
+                  </a>
+                </p>
+              )}
+              <Button
+                type='button'
+                variant='outline'
+                className='mt-3'
+                onClick={() => setEnviado(false)}
+              >
+                Emitir novamente
+              </Button>
+            </>
+          ) : (
+            <>
+              <strong>Solicitação registrada com sucesso.</strong>
+              <p className='mt-1.5 text-[0.86rem] text-ink-soft'>
+                Este é um protótipo — nenhuma solicitação real foi enviada.
+              </p>
+            </>
+          )}
         </div>
       </div>
     );
@@ -131,8 +222,13 @@ export default function FormularioConfirmacao({
       {erros.termos && (
         <span className='text-[0.76rem] text-destructive'>{erros.termos}</span>
       )}
-      <Button type='submit' disabled={!podeEnviar}>
-        Confirmar parcelamento
+      {aguardandoSimulacao && (
+        <span className='text-[0.76rem] text-ink-soft'>
+          Simule o parcelamento antes de emitir a guia e o contrato.
+        </span>
+      )}
+      <Button type='submit' disabled={!podeEnviar || emitindo}>
+        {emitindo ? 'Emitindo...' : 'Emitir Guia/Contrato'}
       </Button>
 
       <Dialog open={termosAbertos} onOpenChange={setTermosAbertos}>
