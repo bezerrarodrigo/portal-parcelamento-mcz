@@ -35,7 +35,7 @@ const itens: ItemNavegacao[] = [
   },
   {
     label: 'Parcelamento',
-    href: '/negociacao',
+    href: '/parcelamento',
     icon: Archive,
     habilitado: true,
   },

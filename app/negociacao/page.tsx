@@ -13,8 +13,10 @@ interface NegociacaoPageProps {
 export default async function NegociacaoPage({
   searchParams,
 }: NegociacaoPageProps) {
-  const { cadastro, inscricao } = await searchParams;
+  const { cadastro, inscricao, mode } = await searchParams;
   const debitos = getDebitosPorInscricao(inscricao ?? '');
+  const modalidadeSelecionada =
+    mode === 'vista' ? 'À vista' : mode === 'parcelado' ? 'Parcelado' : null;
 
   return (
     <main className='flex min-h-[calc(100vh-82px)] flex-col bg-sand md:flex-row'>
@@ -30,6 +32,7 @@ export default async function NegociacaoPage({
         <p className='mt-2 mb-8 text-ink-soft'>
           Cadastro: {cadastro === 'imovel' ? 'Imóvel' : 'CPF/CNPJ'} · Inscrição
           municipal: {inscricao || 'não informada'}
+          {modalidadeSelecionada && ` · Opção selecionada: ${modalidadeSelecionada}`}
         </p>
 
         <RelacaoDebitos debitos={debitos} />
