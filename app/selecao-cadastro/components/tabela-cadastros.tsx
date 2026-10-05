@@ -8,6 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { Skeleton } from '@/components/ui/skeleton';
 import type { Cadastro } from '@/lib/mock-cadastros';
 import CardCadastro from './card-cadastro';
 
@@ -24,9 +25,12 @@ export default function TabelaCadastros({
   selecionado,
   onSelecionar,
 }: TabelaCadastrosProps) {
-  const mensagemVazio = carregando
-    ? 'Carregando cadastros...'
-    : 'Nenhum cadastro encontrado para os filtros selecionados.';
+  if (carregando) {
+    return <TabelaCadastrosSkeleton />;
+  }
+
+  const mensagemVazio =
+    'Nenhum cadastro encontrado para os filtros selecionados.';
 
   return (
     <>
@@ -101,5 +105,73 @@ export default function TabelaCadastros({
         </div>
       </div>
     </>
+  );
+}
+
+export function TabelaCadastrosSkeleton() {
+  return (
+    <div
+      role='status'
+      aria-label='Carregando cadastros'
+      className='grid gap-3'
+    >
+      <div aria-hidden='true' className='flex flex-col gap-3 md:hidden'>
+        {Array.from({ length: 3 }, (_, index) => (
+          <div
+            key={index}
+            className='rounded-md border border-line bg-white p-4'
+          >
+            <div className='mb-4 flex items-center gap-3'>
+              <Skeleton className='size-4 rounded-full' />
+              <Skeleton className='h-4 w-36' />
+            </div>
+            <div className='grid gap-3'>
+              <Skeleton className='h-4 w-3/4' />
+              <Skeleton className='h-4 w-1/2' />
+              <Skeleton className='h-4 w-2/3' />
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div
+        aria-hidden='true'
+        className='hidden border border-line bg-white md:block'
+      >
+        <div className='overflow-x-auto'>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className='w-10 text-center'>Selecione</TableHead>
+                <TableHead>Cadastro</TableHead>
+                <TableHead>CPF/CNPJ</TableHead>
+                <TableHead>Insc. municipal</TableHead>
+                <TableHead>Nome/Razão social</TableHead>
+                <TableHead>Endereço</TableHead>
+                <TableHead>Vínculo cadastral</TableHead>
+                <TableHead>Situação</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {Array.from({ length: 5 }, (_, row) => (
+                <TableRow key={row}>
+                  {Array.from({ length: 8 }, (_, column) => (
+                    <TableCell key={column}>
+                      <Skeleton
+                        className={
+                          column === 0
+                            ? 'mx-auto size-4 rounded-full'
+                            : 'h-4 w-full min-w-16'
+                        }
+                      />
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      </div>
+    </div>
   );
 }

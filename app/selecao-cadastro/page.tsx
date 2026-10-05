@@ -20,7 +20,7 @@ export default function SelecaoCadastroPage() {
   const [textoFiltro, setTextoFiltro] = useState('');
   const [pesquisa, setPesquisa] = useState({ cadastro: TODOS, texto: '' });
   const [todosCadastros, setTodosCadastros] = useState<Cadastro[]>([]);
-  const [carregando, setCarregando] = useState(false);
+  const [carregando, setCarregando] = useState(true);
   const [selecionado, setSelecionado] = useState<string | null>(null);
 
   useEffect(() => {
