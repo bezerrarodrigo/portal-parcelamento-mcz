@@ -63,6 +63,9 @@ export default function SelecaoCadastroPage() {
   const cadastroSelecionado = todosCadastros.find(
     (item) => item.id === selecionado,
   );
+  const nomeUsuario = todosCadastros.find(
+    (item) => item.nomeRazaoSocial.trim(),
+  )?.nomeRazaoSocial.trim();
 
   function handlePesquisar() {
     setPesquisa({ cadastro: cadastroFiltro, texto: textoFiltro });
@@ -84,6 +87,11 @@ export default function SelecaoCadastroPage() {
       <SidebarSelecao />
 
       <div className='mx-auto w-full max-w-360 flex-1 px-4 py-8 md:px-10 md:py-10'>
+        {nomeUsuario && (
+          <p className='mb-2 text-base font-medium text-ink'>
+            Olá, {nomeUsuario}!
+          </p>
+        )}
         <h1 className='m-0 mb-6 text-[clamp(1.5rem,3vw,2rem)] font-bold tracking-[-0.02em] text-ink uppercase'>
           Selecionar cadastro
         </h1>
