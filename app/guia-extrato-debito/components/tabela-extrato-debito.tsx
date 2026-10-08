@@ -1,16 +1,29 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { Search } from 'lucide-react';
+import { LoaderCircle, Search } from 'lucide-react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { formatDate } from '@/lib/formatters';
 import type { ExtratoDebito } from '@/lib/api/extrato-debito';
+import {
+  emitirGuiaArrecadacao,
+  type GuiaArrecadacao,
+} from '@/lib/api/guia-arrecadacao';
 
 interface TabelaExtratoDebitoProps {
   extrato: ExtratoDebito;
   voltarHref: string;
+  idCadastro: string;
 }
 
 function formatarValor(value: number): string {
@@ -23,6 +36,7 @@ function formatarValor(value: number): string {
 export default function TabelaExtratoDebito({
   extrato,
   voltarHref,
+  idCadastro,
 }: TabelaExtratoDebitoProps) {
   const [exercicio, setExercicio] = useState('');
   const [autoInfracao, setAutoInfracao] = useState('');
@@ -34,6 +48,16 @@ export default function TabelaExtratoDebito({
   });
   const [selecionados, setSelecionados] = useState<Set<string>>(
     () => new Set(),
+  );
+  const [emitindoGuia, setEmitindoGuia] = useState(false);
+  const [guiaEmitida, setGuiaEmitida] = useState<GuiaArrecadacao | null>(null);
+  const [urlPdf, setUrlPdf] = useState<string | null>(null);
+
+  useEffect(
+    () => () => {
+      if (urlPdf) URL.revokeObjectURL(urlPdf);
+    },
+    [urlPdf],
   );
 
   const parcelas = useMemo(() => {
@@ -92,6 +116,40 @@ export default function TabelaExtratoDebito({
       }
       return novosSelecionados;
     });
+  }
+
+  async function handleEmitirGuia() {
+    if (selecionados.size === 0 || emitindoGuia) return;
+
+    const janela = window.open('', '_blank');
+    if (!janela) {
+      toast.error('Permita a abertura de pop-ups para visualizar a guia.');
+      return;
+    }
+
+    janela.opener = null;
+    janela.document.title = 'Preparando guia...';
+    setEmitindoGuia(true);
+
+    try {
+      const guia = await emitirGuiaArrecadacao(
+        idCadastro,
+        Array.from(selecionados),
+      );
+      const novaUrlPdf = URL.createObjectURL(guia.arquivo);
+      janela.location.href = novaUrlPdf;
+      setUrlPdf(novaUrlPdf);
+      setGuiaEmitida(guia);
+    } catch (error) {
+      janela.close();
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : 'Não foi possível emitir a guia. Tente novamente.',
+      );
+    } finally {
+      setEmitindoGuia(false);
+    }
   }
 
   const resumo = extrato.totais;
@@ -313,9 +371,113 @@ export default function TabelaExtratoDebito({
         <Button asChild variant='outline'>
           <Link href={voltarHref}>Voltar</Link>
         </Button>
-        <Button disabled>Emissão Guia à Vista</Button>
+        <Button
+          type='button'
+          disabled={selecionados.size === 0 || emitindoGuia}
+          onClick={handleEmitirGuia}
+        >
+          {emitindoGuia && <LoaderCircle className='animate-spin' />}
+          {emitindoGuia ? 'Emitindo guia...' : 'Emissão Guia à Vista'}
+        </Button>
         <Button disabled>Extrato Débito</Button>
       </div>
+
+      <Dialog
+        open={Boolean(guiaEmitida)}
+        onOpenChange={(aberto) => {
+          if (!aberto) setGuiaEmitida(null);
+        }}
+      >
+        <DialogContent className='max-h-[calc(100vh-2rem)] max-w-xl overflow-y-auto'>
+          <DialogHeader>
+            <DialogTitle>Guia emitida</DialogTitle>
+            <DialogDescription>
+              O PDF foi aberto em uma nova aba. Confira os dados de pagamento
+              abaixo.
+            </DialogDescription>
+          </DialogHeader>
+
+          {guiaEmitida && (
+            <div className='grid gap-4'>
+              <dl className='grid gap-3 sm:grid-cols-2'>
+                {guiaEmitida.valor && (
+                  <div>
+                    <dt className='text-xs text-ink-soft'>Valor</dt>
+                    <dd className='m-0 font-semibold text-ink'>
+                      R$ {guiaEmitida.valor}
+                    </dd>
+                  </div>
+                )}
+                {guiaEmitida.vencimento && (
+                  <div>
+                    <dt className='text-xs text-ink-soft'>Vencimento</dt>
+                    <dd className='m-0 font-semibold text-ink'>
+                      {guiaEmitida.vencimento}
+                    </dd>
+                  </div>
+                )}
+                {guiaEmitida.codigoBarra && (
+                  <div className='sm:col-span-2'>
+                    <dt className='text-xs text-ink-soft'>Código de barras</dt>
+                    <dd className='m-0 break-all font-mono text-sm text-ink'>
+                      {guiaEmitida.codigoBarra}
+                    </dd>
+                  </div>
+                )}
+                {guiaEmitida.linhaDigitavel && (
+                  <div className='sm:col-span-2'>
+                    <dt className='text-xs text-ink-soft'>Linha digitável</dt>
+                    <dd className='m-0 break-all font-mono text-sm text-ink'>
+                      {guiaEmitida.linhaDigitavel}
+                    </dd>
+                  </div>
+                )}
+              </dl>
+
+              {guiaEmitida.qrCode && (
+                <div className='grid gap-1'>
+                  <h3 className='m-0 text-sm font-semibold text-ink'>PIX</h3>
+                  <p className='m-0 break-all border border-line bg-sand p-3 font-mono text-xs text-ink'>
+                    {guiaEmitida.qrCode}
+                  </p>
+                </div>
+              )}
+
+              <div className='flex flex-wrap gap-2'>
+                {urlPdf && (
+                  <Button asChild variant='outline'>
+                    <a href={urlPdf} target='_blank' rel='noreferrer'>
+                      Abrir PDF novamente
+                    </a>
+                  </Button>
+                )}
+                {guiaEmitida.linkQrCode && (
+                  <Button asChild variant='outline'>
+                    <a
+                      href={guiaEmitida.linkQrCode}
+                      target='_blank'
+                      rel='noreferrer'
+                    >
+                      Abrir QR Code
+                    </a>
+                  </Button>
+                )}
+                {guiaEmitida.linkPagamento && (
+                  <Button asChild>
+                    <a
+                      href={guiaEmitida.linkPagamento}
+                      target='_blank'
+                      rel='noreferrer'
+                    >
+                      Pagar com cartão
+                    </a>
+                  </Button>
+                )}
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

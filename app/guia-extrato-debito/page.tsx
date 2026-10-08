@@ -48,7 +48,11 @@ export default async function GuiaExtratoDebitoPage({
         </p>
 
         {extrato ? (
-          <TabelaExtratoDebito extrato={extrato} voltarHref={voltarHref} />
+          <TabelaExtratoDebito
+            extrato={extrato}
+            voltarHref={voltarHref}
+            idCadastro={id!}
+          />
         ) : (
           <div
             role='alert'
