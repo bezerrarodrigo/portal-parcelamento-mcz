@@ -127,6 +127,7 @@ export default function TabelaExtratoDebito({
       return;
     }
 
+    window.focus();
     janela.opener = null;
     janela.document.title = 'Preparando guia...';
     setEmitindoGuia(true);

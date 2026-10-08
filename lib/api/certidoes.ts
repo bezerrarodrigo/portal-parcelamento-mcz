@@ -1,8 +1,9 @@
 import axios from 'axios';
 import { internalApiClient } from '@/lib/http-client';
+import { normalizarMensagens } from '@/lib/api/mensagens';
 
 interface CertidaoFinanceiraResponse {
-  mensagens?: string[];
+  mensagens?: unknown;
   imagem?: string;
 }
 
@@ -16,25 +17,25 @@ export async function obterCertidaoFinanceira(
   let data: CertidaoFinanceiraResponse;
 
   try {
-    const response =
-      await internalApiClient.get<CertidaoFinanceiraResponse>(
-        '/certidao/imprimeCertidaoFinanceiro',
-        { params: { idCadastro: idContrato } },
-      );
+    const response = await internalApiClient.get<CertidaoFinanceiraResponse>(
+      '/certidao/imprimeCertidaoFinanceiro',
+      { params: { idCadastro: idContrato } },
+    );
     data = response.data;
   } catch (error) {
-    if (
-      axios.isAxiosError<CertidaoFinanceiraResponse>(error) &&
-      error.response?.data?.mensagens?.length
-    ) {
-      throw new Error(error.response.data.mensagens.join(' '));
+    const mensagens = axios.isAxiosError<CertidaoFinanceiraResponse>(error)
+      ? normalizarMensagens(error.response?.data?.mensagens)
+      : [];
+    if (mensagens.length) {
+      throw new Error(mensagens.join(' '));
     }
 
     throw error;
   }
 
-  if (data.mensagens?.length) {
-    throw new Error(data.mensagens.join(' '));
+  const mensagens = normalizarMensagens(data.mensagens);
+  if (mensagens.length) {
+    throw new Error(mensagens.join(' '));
   }
   if (!data.imagem) {
     throw new Error('A API não retornou o arquivo da certidão.');

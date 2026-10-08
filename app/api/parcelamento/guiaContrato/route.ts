@@ -2,9 +2,10 @@ import axios from 'axios';
 import { NextRequest, NextResponse } from 'next/server';
 import { apiClient } from '@/lib/http-client';
 import { validarDadosSimulacao } from '@/lib/api/validar-dados-simulacao';
+import { normalizarMensagens } from '@/lib/api/mensagens';
 
 interface ArquivoResponse {
-  mensagens?: string[];
+  mensagens?: unknown;
 }
 
 export async function POST(request: NextRequest) {
@@ -33,9 +34,16 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(data);
   } catch (error) {
-    const mensagens = axios.isAxiosError<ArquivoResponse>(error)
-      ? (error.response?.data?.mensagens ?? [error.message])
-      : ['Erro ao gerar a guia e o contrato no SIAT.'];
+    const mensagensApi = axios.isAxiosError<ArquivoResponse>(error)
+      ? normalizarMensagens(error.response?.data?.mensagens)
+      : [];
+    const mensagens = mensagensApi.length
+      ? mensagensApi
+      : [
+          axios.isAxiosError(error)
+            ? error.message
+            : 'Erro ao gerar a guia e o contrato no SIAT.',
+        ];
 
     return NextResponse.json({ mensagens }, { status: 502 });
   }

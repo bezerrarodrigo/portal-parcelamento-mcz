@@ -1,9 +1,10 @@
 import axios from 'axios';
 import { NextRequest, NextResponse } from 'next/server';
 import { apiClient } from '@/lib/http-client';
+import { normalizarMensagens } from '@/lib/api/mensagens';
 
 interface CertidaoFinanceiraResponse {
-  mensagens?: string[];
+  mensagens?: unknown;
   imagem?: string;
 }
 
@@ -25,9 +26,16 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(data);
   } catch (error) {
-    const mensagens = axios.isAxiosError<CertidaoFinanceiraResponse>(error)
-      ? (error.response?.data?.mensagens ?? [error.message])
-      : ['Erro ao gerar a certidão no SIAT.'];
+    const mensagensApi = axios.isAxiosError<CertidaoFinanceiraResponse>(error)
+      ? normalizarMensagens(error.response?.data?.mensagens)
+      : [];
+    const mensagens = mensagensApi.length
+      ? mensagensApi
+      : [
+          axios.isAxiosError(error)
+            ? error.message
+            : 'Erro ao gerar a certidão no SIAT.',
+        ];
 
     return NextResponse.json({ mensagens }, { status: 502 });
   }

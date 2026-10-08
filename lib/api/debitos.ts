@@ -1,4 +1,5 @@
 import { apiClient } from '@/lib/http-client';
+import { normalizarMensagens } from '@/lib/api/mensagens';
 
 export interface ResumoDebitos {
   vencidos: number;
@@ -7,13 +8,13 @@ export interface ResumoDebitos {
 }
 
 interface DebitoResumoApiItem {
-  mensagens?: string[];
+  mensagens?: unknown;
   descricao: string;
   total: number;
 }
 
 interface ListaDebitosResponse {
-  mensagens?: string[];
+  mensagens?: unknown;
   debitos: DebitoResumoApiItem[];
 }
 
@@ -33,8 +34,9 @@ export async function obterResumoDebitos(
     params: { codigoCadastro },
   });
 
-  if (data.mensagens?.length) {
-    throw new Error(data.mensagens.join(' '));
+  const mensagens = normalizarMensagens(data.mensagens);
+  if (mensagens.length) {
+    throw new Error(mensagens.join(' '));
   }
 
   const debitos = data.debitos ?? [];

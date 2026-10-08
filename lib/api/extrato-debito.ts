@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { apiClient } from '@/lib/http-client';
+import { normalizarMensagens } from '@/lib/api/mensagens';
 
 interface ParcelaCalculadaApi {
   id: number;
@@ -27,7 +28,7 @@ interface LegendaApi {
 }
 
 interface ExtratoDebitoApiResponse {
-  mensagens?: string[];
+  mensagens?: unknown;
   dataCalculo?: number | null;
   quantidadeGuiasDevido?: number | null;
   totalEmolumentoDevido?: number | null;
@@ -149,8 +150,9 @@ export async function obterExtratoDebito(
       { params: { idCadastro } },
     );
 
-    if (data.mensagens?.length) {
-      throw new Error(data.mensagens.join(' '));
+    const mensagens = normalizarMensagens(data.mensagens);
+    if (mensagens.length) {
+      throw new Error(mensagens.join(' '));
     }
 
     const parcelasApi = data.parcelasCalculadas ?? [];
@@ -178,11 +180,11 @@ export async function obterExtratoDebito(
       },
     };
   } catch (error) {
-    if (
-      axios.isAxiosError<ExtratoDebitoApiResponse>(error) &&
-      error.response?.data?.mensagens?.length
-    ) {
-      throw new Error(error.response.data.mensagens.join(' '));
+    const mensagens = axios.isAxiosError<ExtratoDebitoApiResponse>(error)
+      ? normalizarMensagens(error.response?.data?.mensagens)
+      : [];
+    if (mensagens.length) {
+      throw new Error(mensagens.join(' '));
     }
 
     if (

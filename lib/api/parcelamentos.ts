@@ -2,6 +2,7 @@ import axios from 'axios';
 import { apiClient } from '@/lib/http-client';
 import type { Debito } from '@/lib/mock-debitos';
 import type { DadosGuia } from '@/lib/api/guia-contrato';
+import { normalizarMensagens } from '@/lib/api/mensagens';
 
 interface ParcelaPermitidaApi {
   id: number;
@@ -35,9 +36,9 @@ interface RegraParcelamentoApi {
 }
 
 interface ExtratoPorRegraResponse {
-  mensagens?: string[];
+  mensagens?: unknown;
   extratoDebito?: {
-    mensagens?: string[];
+    mensagens?: unknown;
   };
   regrasParcelamento?: RegraParcelamentoApi[];
 }
@@ -101,9 +102,7 @@ function converterData(value: number | string | null | undefined): string {
   return Number.isNaN(data.getTime()) ? '' : data.toISOString().slice(0, 10);
 }
 
-function converterExercicio(
-  value: number | string | null | undefined,
-): number {
+function converterExercicio(value: number | string | null | undefined): number {
   if (value === null || value === undefined || value === '') {
     return 0;
   }
@@ -113,15 +112,10 @@ function converterExercicio(
     return 0;
   }
 
-  return numero > 9999
-    ? new Date(numero).getUTCFullYear()
-    : numero;
+  return numero > 9999 ? new Date(numero).getUTCFullYear() : numero;
 }
 
-function mapearParcela(
-  parcela: ParcelaPermitidaApi,
-  idRegra: number,
-): Debito {
+function mapearParcela(parcela: ParcelaPermitidaApi, idRegra: number): Debito {
   const credito = parcela.lancamentoCreditoTributarioRS;
   const tributo = credito?.tributo;
 
@@ -211,8 +205,8 @@ export async function obterOpcoesParcelamento(
     );
 
     const mensagens = [
-      ...(data.mensagens ?? []),
-      ...(data.extratoDebito?.mensagens ?? []),
+      ...normalizarMensagens(data.mensagens),
+      ...normalizarMensagens(data.extratoDebito?.mensagens),
     ];
     if (mensagens.length) {
       throw new Error(mensagens.join(' '));
@@ -224,15 +218,17 @@ export async function obterOpcoesParcelamento(
 
     const opcoes = data.regrasParcelamento.map(mapearRegra);
     if (opcoes.length === 0) {
-      throw new Error('Não há opções de parcelamento disponíveis para este cadastro.');
+      throw new Error(
+        'Não há opções de parcelamento disponíveis para este cadastro.',
+      );
     }
 
     return opcoes;
   } catch (error) {
     if (axios.isAxiosError<ExtratoPorRegraResponse>(error)) {
       const mensagens = [
-        ...(error.response?.data?.mensagens ?? []),
-        ...(error.response?.data?.extratoDebito?.mensagens ?? []),
+        ...normalizarMensagens(error.response?.data?.mensagens),
+        ...normalizarMensagens(error.response?.data?.extratoDebito?.mensagens),
       ];
       if (mensagens.length) {
         throw new Error(mensagens.join(' '));
