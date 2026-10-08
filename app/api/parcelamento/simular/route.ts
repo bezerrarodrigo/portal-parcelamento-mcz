@@ -2,9 +2,10 @@ import axios from 'axios';
 import { NextRequest, NextResponse } from 'next/server';
 import { apiClient } from '@/lib/http-client';
 import { validarDadosSimulacao } from '@/lib/api/validar-dados-simulacao';
+import { normalizarMensagens } from '@/lib/api/mensagens';
 
 interface SimulacaoResponse {
-  mensagens?: string[];
+  mensagens?: unknown;
 }
 
 export async function POST(request: NextRequest) {
@@ -31,9 +32,16 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(data);
   } catch (error) {
-    const mensagens = axios.isAxiosError<SimulacaoResponse>(error)
-      ? (error.response?.data?.mensagens ?? [error.message])
-      : ['Erro ao simular o parcelamento no SIAT.'];
+    const mensagensApi = axios.isAxiosError<SimulacaoResponse>(error)
+      ? normalizarMensagens(error.response?.data?.mensagens)
+      : [];
+    const mensagens = mensagensApi.length
+      ? mensagensApi
+      : [
+          axios.isAxiosError(error)
+            ? error.message
+            : 'Erro ao simular o parcelamento no SIAT.',
+        ];
 
     return NextResponse.json({ mensagens }, { status: 502 });
   }

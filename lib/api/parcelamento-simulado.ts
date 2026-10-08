@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { internalApiClient } from '@/lib/http-client';
 import type { GuiaContratoRequest } from '@/lib/api/guia-contrato';
+import { normalizarMensagens } from '@/lib/api/mensagens';
 
 export interface ParcelaSimulada {
   descricao: string;
@@ -22,7 +23,7 @@ export interface ParcelamentoSimulado {
   valorDemaisParcelas: number;
   quantidadeParcelas: number;
   parcelasSimuladas: ParcelaSimulada[];
-  mensagens?: string[];
+  mensagens?: unknown;
 }
 
 export async function simularParcelamentoApi(
@@ -38,18 +39,19 @@ export async function simularParcelamentoApi(
     );
     data = response.data;
   } catch (error) {
-    if (
-      axios.isAxiosError<ParcelamentoSimulado>(error) &&
-      error.response?.data?.mensagens?.length
-    ) {
-      throw new Error(error.response.data.mensagens.join(' '));
+    const mensagens = axios.isAxiosError<ParcelamentoSimulado>(error)
+      ? normalizarMensagens(error.response?.data?.mensagens)
+      : [];
+    if (mensagens.length) {
+      throw new Error(mensagens.join(' '));
     }
 
     throw error;
   }
 
-  if (data.mensagens?.length) {
-    throw new Error(data.mensagens.join(' '));
+  const mensagens = normalizarMensagens(data.mensagens);
+  if (mensagens.length) {
+    throw new Error(mensagens.join(' '));
   }
   if (!data.parcelasSimuladas?.length) {
     throw new Error('A API não retornou a simulação do parcelamento.');

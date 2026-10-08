@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { internalApiClient } from '@/lib/http-client';
 import type { Debito } from '@/lib/mock-debitos';
+import { normalizarMensagens } from '@/lib/api/mensagens';
 
 export const QUANTIDADE_MINIMA_PARCELAS = 1;
 export const QUANTIDADE_MAXIMA_PARCELAS = 12;
@@ -91,7 +92,7 @@ export function montarRequisicaoGuia({
 }
 
 interface ArquivoResponse {
-  mensagens?: string[];
+  mensagens?: unknown;
   imagem?: string;
   tipo?: string;
   nome?: string;
@@ -117,18 +118,19 @@ export async function gerarGuiaContrato(
     );
     data = response.data;
   } catch (error) {
-    if (
-      axios.isAxiosError<ArquivoResponse>(error) &&
-      error.response?.data?.mensagens?.length
-    ) {
-      throw new Error(error.response.data.mensagens.join(' '));
+    const mensagens = axios.isAxiosError<ArquivoResponse>(error)
+      ? normalizarMensagens(error.response?.data?.mensagens)
+      : [];
+    if (mensagens.length) {
+      throw new Error(mensagens.join(' '));
     }
 
     throw error;
   }
 
-  if (data.mensagens?.length) {
-    throw new Error(data.mensagens.join(' '));
+  const mensagens = normalizarMensagens(data.mensagens);
+  if (mensagens.length) {
+    throw new Error(mensagens.join(' '));
   }
   if (!data.imagem) {
     throw new Error('A API não retornou o arquivo da guia e do contrato.');

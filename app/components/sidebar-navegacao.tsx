@@ -27,7 +27,12 @@ const itens: ItemNavegacao[] = [
     icon: User,
     habilitado: true,
   },
-  { label: 'Guia / Extrato Débito', href: '/dashboard', icon: FileText },
+  {
+    label: 'Guia / Extrato Débito',
+    href: '/guia-extrato-debito',
+    icon: FileText,
+    habilitado: true,
+  },
   { label: 'Extrato de pagamento', href: '/dashboard', icon: Receipt },
   {
     label: 'Extrato de parcelamento',
@@ -68,6 +73,9 @@ function ConteudoSidebarNavegacao() {
   const hrefParcelamento = parametrosParcelamento.size
     ? `/parcelamento?${parametrosParcelamento.toString()}`
     : '/parcelamento';
+  const hrefExtratoDebito = parametrosParcelamento.size
+    ? `/guia-extrato-debito?${parametrosParcelamento.toString()}`
+    : '/guia-extrato-debito';
 
   return (
     <aside className='flex shrink-0 flex-wrap gap-4 border-b border-line bg-white px-4 py-3 md:w-32 md:flex-col md:flex-nowrap md:items-center md:gap-6 md:border-r md:border-b-0 md:py-8'>
@@ -75,7 +83,11 @@ function ConteudoSidebarNavegacao() {
         const Icon = item.icon;
         const ativo = item.habilitado && pathname === item.href;
         const href =
-          item.href === '/parcelamento' ? hrefParcelamento : item.href;
+          item.href === '/parcelamento'
+            ? hrefParcelamento
+            : item.href === '/guia-extrato-debito'
+              ? hrefExtratoDebito
+              : item.href;
         const conteudo = (
           <>
             <span
