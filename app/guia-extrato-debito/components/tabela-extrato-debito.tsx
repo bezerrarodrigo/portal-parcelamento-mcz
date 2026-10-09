@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/dialog';
 import { formatDate } from '@/lib/formatters';
 import type { ExtratoDebito } from '@/lib/api/extrato-debito';
+import { emitirRelatorioExtratoDebito } from '@/lib/api/extrato-debito-relatorio';
 import {
   emitirGuiaArrecadacao,
   type GuiaArrecadacao,
@@ -50,14 +51,23 @@ export default function TabelaExtratoDebito({
     () => new Set(),
   );
   const [emitindoGuia, setEmitindoGuia] = useState(false);
+  const [emitindoExtrato, setEmitindoExtrato] = useState(false);
   const [guiaEmitida, setGuiaEmitida] = useState<GuiaArrecadacao | null>(null);
   const [urlPdf, setUrlPdf] = useState<string | null>(null);
+  const [urlPdfExtrato, setUrlPdfExtrato] = useState<string | null>(null);
 
   useEffect(
     () => () => {
       if (urlPdf) URL.revokeObjectURL(urlPdf);
     },
     [urlPdf],
+  );
+
+  useEffect(
+    () => () => {
+      if (urlPdfExtrato) URL.revokeObjectURL(urlPdfExtrato);
+    },
+    [urlPdfExtrato],
   );
 
   const parcelas = useMemo(() => {
@@ -150,6 +160,36 @@ export default function TabelaExtratoDebito({
       );
     } finally {
       setEmitindoGuia(false);
+    }
+  }
+
+  async function handleEmitirExtrato() {
+    if (emitindoExtrato) return;
+
+    const janela = window.open('', '_blank');
+    if (!janela) {
+      toast.error('Permita a abertura de pop-ups para visualizar o extrato.');
+      return;
+    }
+
+    janela.opener = null;
+    janela.document.title = 'Preparando extrato...';
+    setEmitindoExtrato(true);
+
+    try {
+      const relatorio = await emitirRelatorioExtratoDebito(idCadastro);
+      const novaUrlPdf = URL.createObjectURL(relatorio.arquivo);
+      janela.location.href = novaUrlPdf;
+      setUrlPdfExtrato(novaUrlPdf);
+    } catch (error) {
+      janela.close();
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : 'Não foi possível emitir o extrato de débitos. Tente novamente.',
+      );
+    } finally {
+      setEmitindoExtrato(false);
     }
   }
 
@@ -380,7 +420,14 @@ export default function TabelaExtratoDebito({
           {emitindoGuia && <LoaderCircle className='animate-spin' />}
           {emitindoGuia ? 'Emitindo guia...' : 'Emissão Guia à Vista'}
         </Button>
-        <Button disabled>Extrato Débito</Button>
+        <Button
+          type='button'
+          disabled={emitindoExtrato}
+          onClick={handleEmitirExtrato}
+        >
+          {emitindoExtrato && <LoaderCircle className='animate-spin' />}
+          {emitindoExtrato ? 'Emitindo extrato...' : 'Extrato Débito'}
+        </Button>
       </div>
 
       <Dialog
