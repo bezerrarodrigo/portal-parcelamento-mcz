@@ -33,26 +33,30 @@ export default async function ExtratoPagamentoPage({
         </p>
 
         {id && /^\d+$/.test(id) ? (
-          <ConsultaExtratoPagamento idCadastro={id} />
+          <ConsultaExtratoPagamento
+            idCadastro={id}
+            voltarHref={voltarHref}
+          />
         ) : (
-          <div
-            role='alert'
-            className='border border-line bg-white p-5 text-sm text-ink'
-          >
-            <p className='m-0'>
-              Selecione um cadastro antes de consultar os pagamentos.
-            </p>
-            <Button asChild variant='outline' className='mt-4'>
-              <Link href='/selecao-cadastro'>Selecionar cadastro</Link>
-            </Button>
-          </div>
+          <>
+            <div
+              role='alert'
+              className='border border-line bg-white p-5 text-sm text-ink'
+            >
+              <p className='m-0'>
+                Selecione um cadastro antes de consultar os pagamentos.
+              </p>
+              <Button asChild variant='outline' className='mt-4'>
+                <Link href='/selecao-cadastro'>Selecionar cadastro</Link>
+              </Button>
+            </div>
+            <div className='mt-7'>
+              <Button asChild variant='outline'>
+                <Link href={voltarHref}>Voltar</Link>
+              </Button>
+            </div>
+          </>
         )}
-
-        <div className='mt-7'>
-          <Button asChild variant='outline'>
-            <Link href={voltarHref}>Voltar</Link>
-          </Button>
-        </div>
       </div>
     </main>
   );

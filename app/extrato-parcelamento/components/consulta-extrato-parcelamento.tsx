@@ -1,11 +1,16 @@
 'use client';
 
 import axios from 'axios';
+import Link from 'next/link';
+import { LoaderCircle } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
+import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
 import {
   buscarExtratoParcelamento,
   type ContratoParcelamento,
 } from '@/lib/api/extrato-parcelamento';
+import { emitirRelatorioExtratoParcelamento } from '@/lib/api/extrato-parcelamento-relatorio';
 
 const colunas = [
   'Selecione',
@@ -20,6 +25,7 @@ const colunas = [
 
 interface ConsultaExtratoParcelamentoProps {
   idCadastro: string;
+  voltarHref: string;
 }
 
 function formatarData(value: string | number | null | undefined): string {
@@ -48,6 +54,17 @@ function formatarValor(value: number | string | null | undefined): string {
   });
 }
 
+function eLongValido(valor: string): boolean {
+  if (!/^\d{1,19}$/.test(valor)) return false;
+  const normalizado = valor.replace(/^0+(?=\d)/, '');
+  const limiteLong = '9223372036854775807';
+  return (
+    normalizado.length < limiteLong.length ||
+    (normalizado.length === limiteLong.length &&
+      normalizado <= limiteLong)
+  );
+}
+
 function mensagemErroConsulta(error: unknown): string {
   if (
     axios.isAxiosError(error) &&
@@ -62,6 +79,7 @@ function mensagemErroConsulta(error: unknown): string {
 
 export default function ConsultaExtratoParcelamento({
   idCadastro,
+  voltarHref,
 }: ConsultaExtratoParcelamentoProps) {
   const [contratos, setContratos] = useState<ContratoParcelamento[]>([]);
   const [carregando, setCarregando] = useState(true);
@@ -72,6 +90,15 @@ export default function ConsultaExtratoParcelamento({
   );
   const [quantidadePorPagina, setQuantidadePorPagina] = useState(10);
   const [paginaAtual, setPaginaAtual] = useState(1);
+  const [imprimindo, setImprimindo] = useState(false);
+  const [urlPdf, setUrlPdf] = useState<string | null>(null);
+
+  useEffect(
+    () => () => {
+      if (urlPdf) URL.revokeObjectURL(urlPdf);
+    },
+    [urlPdf],
+  );
 
   useEffect(() => {
     let consultaAtiva = true;
@@ -119,6 +146,43 @@ export default function ConsultaExtratoParcelamento({
   function atualizarFiltro(value: string) {
     setFiltro(value);
     setPaginaAtual(1);
+  }
+
+  async function handleImprimir() {
+    if (
+      !contratoSelecionado ||
+      !eLongValido(contratoSelecionado) ||
+      imprimindo
+    ) {
+      return;
+    }
+
+    const janela = window.open('', '_blank');
+    if (!janela) {
+      toast.error('Permita a abertura de pop-ups para visualizar o extrato.');
+      return;
+    }
+
+    janela.opener = null;
+    janela.document.title = 'Preparando extrato de parcelamento...';
+    setImprimindo(true);
+
+    try {
+      const relatorio =
+        await emitirRelatorioExtratoParcelamento(contratoSelecionado);
+      const novaUrlPdf = URL.createObjectURL(relatorio.arquivo);
+      janela.location.href = novaUrlPdf;
+      setUrlPdf(novaUrlPdf);
+    } catch (error) {
+      janela.close();
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : 'Não foi possível emitir o extrato de parcelamento. Tente novamente.',
+      );
+    } finally {
+      setImprimindo(false);
+    }
   }
 
   return (
@@ -189,18 +253,26 @@ export default function ConsultaExtratoParcelamento({
             ) : (
               contratosPagina.map((contrato, index) => {
                 const contratoId = String(contrato.id ?? contrato.codigoContrato ?? index);
+                const idContrato =
+                  contrato.id === null || contrato.id === undefined
+                    ? ''
+                    : String(contrato.id);
                 const codigoContrato =
                   contrato.codigoContrato ?? contrato.id ?? '-';
 
                 return (
-                  <tr key={contratoId} className='odd:bg-white even:bg-[#f2f2f2]'>
+                  <tr
+                    key={contratoId}
+                    className='odd:bg-white even:bg-[#f2f2f2]'
+                  >
                     <td className='border border-line px-3 py-2 text-center'>
                       <input
                         type='radio'
                         name='contrato-selecionado'
-                        value={contratoId}
-                        checked={contratoSelecionado === contratoId}
-                        onChange={() => setContratoSelecionado(contratoId)}
+                        value={idContrato}
+                        checked={contratoSelecionado === idContrato}
+                        disabled={!eLongValido(idContrato)}
+                        onChange={() => setContratoSelecionado(idContrato)}
                         aria-label={`Selecionar contrato ${codigoContrato}`}
                       />
                     </td>
@@ -277,6 +349,22 @@ export default function ConsultaExtratoParcelamento({
             Próxima
           </button>
         )}
+      </div>
+
+      <div className='mt-7 flex gap-3'>
+        <Button asChild variant='outline'>
+          <Link href={voltarHref}>Voltar</Link>
+        </Button>
+        <Button
+          type='button'
+          onClick={handleImprimir}
+          disabled={!contratoSelecionado || imprimindo || carregando || !!erro}
+        >
+          {imprimindo && (
+            <LoaderCircle size={16} className='animate-spin' aria-hidden='true' />
+          )}
+          {imprimindo ? 'Preparando...' : 'Imprimir'}
+        </Button>
       </div>
     </>
   );
