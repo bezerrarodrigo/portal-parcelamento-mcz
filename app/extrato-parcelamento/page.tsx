@@ -2,18 +2,18 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import CadastroSelecionadoHeader from '../components/cadastro-selecionado-header';
 import SidebarNavegacao from '../components/sidebar-navegacao';
-import ConsultaExtratoPagamento from './components/consulta-extrato-pagamento';
+import ConsultaExtratoParcelamento from './components/consulta-extrato-parcelamento';
 
-interface ExtratoPagamentoPageProps {
+interface ExtratoParcelamentoPageProps {
   searchParams: Promise<{
     id?: string;
     inscricao?: string;
   }>;
 }
 
-export default async function ExtratoPagamentoPage({
+export default async function ExtratoParcelamentoPage({
   searchParams,
-}: ExtratoPagamentoPageProps) {
+}: ExtratoParcelamentoPageProps) {
   const { id, inscricao } = await searchParams;
   const voltarHref = inscricao
     ? `/dashboard?${new URLSearchParams({ id: id ?? '', inscricao })}`
@@ -26,14 +26,14 @@ export default async function ExtratoPagamentoPage({
       <div className='mx-auto w-full max-w-360 flex-1 px-4 py-8 md:px-8 md:py-10'>
         <CadastroSelecionadoHeader />
         <h1 className='m-0 text-2xl font-bold tracking-normal text-ink uppercase'>
-          Consulta pagamentos
+          Visualizar contratos
         </h1>
         <p className='mb-5 mt-1 text-sm text-ink-soft'>
-          Veja aqui todos os pagamentos.
+          Veja aqui todos os contratos de parcelamentos.
         </p>
 
         {id && /^\d+$/.test(id) ? (
-          <ConsultaExtratoPagamento
+          <ConsultaExtratoParcelamento
             idCadastro={id}
             voltarHref={voltarHref}
           />
@@ -44,7 +44,8 @@ export default async function ExtratoPagamentoPage({
               className='border border-line bg-white p-5 text-sm text-ink'
             >
               <p className='m-0'>
-                Selecione um cadastro antes de consultar os pagamentos.
+                Selecione um cadastro antes de consultar os contratos de
+                parcelamento.
               </p>
               <Button asChild variant='outline' className='mt-4'>
                 <Link href='/selecao-cadastro'>Selecionar cadastro</Link>

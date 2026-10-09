@@ -41,8 +41,9 @@ const itens: ItemNavegacao[] = [
   },
   {
     label: 'Extrato de parcelamento',
-    href: '/dashboard',
+    href: '/extrato-parcelamento',
     icon: FileSpreadsheet,
+    habilitado: true,
   },
   {
     label: 'Parcelamento',
@@ -85,8 +86,8 @@ function ConteudoSidebarNavegacao() {
     ? `/extrato-pagamento?${parametrosParcelamento.toString()}`
     : '/extrato-pagamento';
   const hrefExtratoParcelamento = parametrosParcelamento.size
-    ? `/dashboard?${parametrosParcelamento.toString()}`
-    : '/dashboard';
+    ? `/extrato-parcelamento?${parametrosParcelamento.toString()}`
+    : '/extrato-parcelamento';
 
   return (
     <aside className='flex shrink-0 flex-wrap gap-4 border-b border-line bg-white px-4 py-3 md:w-32 md:flex-col md:flex-nowrap md:items-center md:gap-6 md:border-r md:border-b-0 md:py-8'>
@@ -100,7 +101,7 @@ function ConteudoSidebarNavegacao() {
               ? hrefExtratoDebito
               : item.href === '/extrato-pagamento'
                 ? hrefExtratoPagamento
-                : item.href === '/dashboard'
+                  : item.href === '/extrato-parcelamento'
                   ? hrefExtratoParcelamento
               : item.href;
         const conteudo = (
