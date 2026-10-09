@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { listarCadastrosPorCpfCnpj } from '@/lib/api/cadastros';
+import { salvarCadastroSelecionado } from '@/lib/cadastro-selecionado';
 import type { Cadastro } from '@/lib/mock-cadastros';
 import FiltroCadastro, { TODOS } from './components/filtro-cadastro';
 
@@ -73,6 +74,17 @@ export default function SelecaoCadastroPage() {
 
   function handleSelecionar() {
     if (!cadastroSelecionado) return;
+
+    try {
+      salvarCadastroSelecionado(cadastroSelecionado);
+    } catch (error) {
+      const mensagem =
+        error instanceof Error
+          ? error.message
+          : 'Não foi possível salvar o cadastro selecionado.';
+      toast.error(mensagem);
+      return;
+    }
 
     const params = new URLSearchParams({
       inscricao: cadastroSelecionado.inscricaoMunicipal,

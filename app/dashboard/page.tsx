@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import { getCadastroPorInscricao } from '@/lib/mock-cadastros';
 import { obterResumoDebitos } from '@/lib/api/debitos';
+import CadastroSelecionadoHeader from '../components/cadastro-selecionado-header';
 import SidebarNavegacao from '../components/sidebar-navegacao';
 import DadosImovel from './components/dados-imovel';
 import DebitosResumo from './components/debitos-resumo';
@@ -37,6 +38,7 @@ export default async function DashboardPage({
       <SidebarNavegacao />
 
       <div className='mx-auto flex w-full max-w-360 flex-1 flex-col gap-6 px-4 py-6 md:px-8 md:py-8'>
+        <CadastroSelecionadoHeader />
         <div className='grid grid-cols-1 gap-6 lg:grid-cols-[2fr_1fr]'>
           <DadosImovel cadastro={cadastro} idContrato={id} />
           <MapaCard />

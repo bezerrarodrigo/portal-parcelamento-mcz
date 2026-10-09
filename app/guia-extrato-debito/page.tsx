@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { obterExtratoDebito } from '@/lib/api/extrato-debito';
+import CadastroSelecionadoHeader from '../components/cadastro-selecionado-header';
 import SidebarNavegacao from '../components/sidebar-navegacao';
 import TabelaExtratoDebito from './components/tabela-extrato-debito';
 
@@ -40,6 +41,7 @@ export default async function GuiaExtratoDebitoPage({
       <SidebarNavegacao />
 
       <div className='mx-auto w-full max-w-360 flex-1 px-4 py-8 md:px-8 md:py-10'>
+        <CadastroSelecionadoHeader />
         <h1 className='m-0 text-2xl font-bold tracking-normal text-ink uppercase'>
           Visualizar débitos
         </h1>

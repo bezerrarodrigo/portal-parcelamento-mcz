@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { obterOpcoesParcelamento } from '@/lib/api/parcelamentos';
+import CadastroSelecionadoHeader from '../components/cadastro-selecionado-header';
 import SidebarNavegacao from '../components/sidebar-navegacao';
 import SelecaoTransacao from './components/selecao-transacao';
 
@@ -36,6 +37,7 @@ export default async function ParcelamentoPage({
       <SidebarNavegacao />
 
       <div className='mx-auto w-full max-w-360 flex-1 px-4 py-8 md:px-10 md:py-10'>
+        <CadastroSelecionadoHeader />
         <p className='mb-3.5 text-[0.74rem] font-extrabold tracking-[0.14em] text-orange uppercase'>
           Relação de débitos
         </p>
