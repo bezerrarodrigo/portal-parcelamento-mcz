@@ -33,7 +33,12 @@ const itens: ItemNavegacao[] = [
     icon: FileText,
     habilitado: true,
   },
-  { label: 'Extrato de pagamento', href: '/dashboard', icon: Receipt },
+  {
+    label: 'Extrato de pagamento',
+    href: '/extrato-pagamento',
+    icon: Receipt,
+    habilitado: true,
+  },
   {
     label: 'Extrato de parcelamento',
     href: '/dashboard',
@@ -76,6 +81,9 @@ function ConteudoSidebarNavegacao() {
   const hrefExtratoDebito = parametrosParcelamento.size
     ? `/guia-extrato-debito?${parametrosParcelamento.toString()}`
     : '/guia-extrato-debito';
+  const hrefExtratoPagamento = parametrosParcelamento.size
+    ? `/extrato-pagamento?${parametrosParcelamento.toString()}`
+    : '/extrato-pagamento';
 
   return (
     <aside className='flex shrink-0 flex-wrap gap-4 border-b border-line bg-white px-4 py-3 md:w-32 md:flex-col md:flex-nowrap md:items-center md:gap-6 md:border-r md:border-b-0 md:py-8'>
@@ -87,6 +95,8 @@ function ConteudoSidebarNavegacao() {
             ? hrefParcelamento
             : item.href === '/guia-extrato-debito'
               ? hrefExtratoDebito
+              : item.href === '/extrato-pagamento'
+                ? hrefExtratoPagamento
               : item.href;
         const conteudo = (
           <>
